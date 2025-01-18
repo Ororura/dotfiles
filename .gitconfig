@@ -1,0 +1,9 @@
+# This is Git's per-user configuration file.
+[user]
+	name = Ororura
+	email = hitmanlol890@gmail.com
+# Please adapt and uncomment the following lines:
+#	name = Ororura
+#	email = hitmanlol890@gmail.coml
+[core]
+	autocrlf = input

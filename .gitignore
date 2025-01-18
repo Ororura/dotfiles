@@ -1,0 +1,6 @@
+*.history
+*.log
+*.cfg
+.ssh/
+.pgadmin/
+.wakatime.cfg
