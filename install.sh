@@ -157,6 +157,10 @@ if [[ "$FULL" == true ]]; then
     )
 fi
 
+if [[ "$BREW" == true ]]; then
+    required_files+=("$DOTFILES_DIR/brew/Brewfile")
+fi
+
 for source in "${required_files[@]}"; do
 
     if [[ ! -f "$source" ]]; then
@@ -171,10 +175,6 @@ for source in "${required_files[@]}"; do
 done
 
 echo
-
-if [[ "$BREW" == true ]]; then
-    required_files+=("$DOTFILES_DIR/brew/Brewfile")
-fi
 
 # ============================================================
 # Dependencies

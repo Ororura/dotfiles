@@ -107,6 +107,131 @@ class InstallerTests(unittest.TestCase):
             [],
         )
 
+    def test_minimal_install(self):
+
+        home = Path(self.home.name)
+
+        self.env["GIT_CONFIG_GLOBAL"] = str(
+            home / ".gitconfig"
+        )
+
+        result = self.run_installer("--minimal")
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            result.stdout + result.stderr,
+        )
+
+        zshrc = home / ".zshrc"
+
+        self.assertTrue(zshrc.is_symlink())
+
+        self.assertEqual(
+            zshrc.resolve(),
+            ROOT / "zsh" / ".zshrc",
+        )
+
+        self.assertFalse(
+            (home / ".tmux.conf").exists()
+        )
+
+        self.assertFalse(
+            (home / ".p10k.zsh").exists()
+        )
+
+        config = subprocess.run(
+            [
+                "git",
+                "config",
+                "--global",
+                "--get-all",
+                "include.path",
+            ],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        self.assertEqual(
+            config.stdout.strip(),
+            str(ROOT / "git" / "config"),
+        )
+
+    def test_minimal_install_is_idempotent(self):
+
+        home = Path(self.home.name)
+
+        self.env["GIT_CONFIG_GLOBAL"] = str(
+            home / ".gitconfig"
+        )
+
+        first = self.run_installer("--minimal")
+
+        self.assertEqual(
+            first.returncode,
+            0,
+            first.stdout + first.stderr,
+        )
+
+        second = self.run_installer("--minimal")
+
+        self.assertEqual(
+            second.returncode,
+            0,
+            second.stdout + second.stderr,
+        )
+
+        self.assertTrue(
+            (home / ".zshrc").is_symlink()
+        )
+
+        self.assertFalse(
+            (home / ".dotfiles-backups").exists()
+        )
+
+    def test_existing_zshrc_is_backed_up(self):
+
+        home = Path(self.home.name)
+
+        self.env["GIT_CONFIG_GLOBAL"] = str(
+            home / ".gitconfig"
+        )
+
+        zshrc = home / ".zshrc"
+
+        zshrc.write_text(
+            "original configuration\n"
+        )
+
+        result = self.run_installer("--minimal")
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            result.stdout + result.stderr,
+        )
+
+        self.assertTrue(
+            zshrc.is_symlink()
+        )
+
+        backups = list(
+            home.glob(
+                ".dotfiles-backups/*/.zshrc"
+            )
+        )
+
+        self.assertEqual(
+            len(backups),
+            1,
+        )
+
+        self.assertEqual(
+            backups[0].read_text(),
+            "original configuration\n",
+        )
 
 if __name__ == "__main__":
     unittest.main()
