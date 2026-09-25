@@ -8,6 +8,8 @@ DOTFILES_DIR="$(
 
 DRY_RUN=false
 FULL=false
+MINIMAL=false
+DOCTOR=false
 BACKUP_DIR=""
 
 # ============================================================
@@ -26,8 +28,16 @@ for arg in "$@"; do
             FULL=true
             ;;
 
+        --minimal)
+            MINIMAL=true
+            ;;
+
+        --doctor)
+            DOCTOR=true
+            ;;
+
         --help)
-            echo "Usage: ./install.sh [--full] [--dry-run]"
+            echo "Usage: ./install.sh [--full | --minimal | --doctor] [--dry-run]"
             exit 0
             ;;
 
@@ -39,6 +49,38 @@ for arg in "$@"; do
     esac
 
 done
+
+# ============================================================
+# Argument validation
+# ============================================================
+
+if [[ "$FULL" == true && "$MINIMAL" == true ]]; then
+    echo "[ERROR] --full and --minimal cannot be combined."
+    exit 1
+fi
+
+if [[ "$DOCTOR" == true ]]; then
+
+    if [[ "$FULL" == true ||
+          "$MINIMAL" == true ||
+          "$DRY_RUN" == true ]]; then
+
+        echo "[ERROR] --doctor cannot be combined with installation flags."
+        exit 1
+
+    fi
+
+    bash "$DOTFILES_DIR/scripts/doctor.sh"
+    exit $?
+
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+
+    echo "[ERROR] Git is required for installation."
+    exit 1
+
+fi
 
 # ============================================================
 # System
@@ -80,10 +122,17 @@ echo "Checking required files..."
 
 required_files=(
     "$DOTFILES_DIR/zsh/.zshrc"
-    "$DOTFILES_DIR/tmux/tmux.conf"
     "$DOTFILES_DIR/git/config"
     "$DOTFILES_DIR/scripts/install-git.sh"
 )
+
+if [[ "$MINIMAL" == false ]]; then
+
+    required_files+=(
+        "$DOTFILES_DIR/tmux/tmux.conf"
+    )
+
+fi
 
 if [[ "$FULL" == true ]]; then
     required_files+=(
@@ -202,15 +251,19 @@ install_link \
     "$DOTFILES_DIR/zsh/.zshrc" \
     "$HOME/.zshrc"
 
-install_link \
-    "$DOTFILES_DIR/tmux/tmux.conf" \
-    "$HOME/.tmux.conf"
-
-if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
+if [[ "$MINIMAL" == false ]]; then
 
     install_link \
-        "$DOTFILES_DIR/zsh/.p10k.zsh" \
-        "$HOME/.p10k.zsh"
+        "$DOTFILES_DIR/tmux/tmux.conf" \
+        "$HOME/.tmux.conf"
+
+    if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
+
+        install_link \
+            "$DOTFILES_DIR/zsh/.p10k.zsh" \
+            "$HOME/.p10k.zsh"
+
+    fi
 
 fi
 
