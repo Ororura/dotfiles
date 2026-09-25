@@ -33,11 +33,8 @@ jobs:
 
           bash -n install.sh
 
-          for file in scripts/*.sh; do
-            bash -n "$file"
-          done
-
-          bash -n .bashrc
+          find scripts -type f -name '*.sh' -print0 |
+            xargs -0 -n 1 bash -n
 
       - name: Check Zsh syntax
         run: |
