@@ -11,6 +11,7 @@ FULL=false
 MINIMAL=false
 DOCTOR=false
 BREW=false
+NVIM=false
 BACKUP_DIR=""
 
 # ============================================================
@@ -31,6 +32,10 @@ for arg in "$@"; do
 
         --brew)
             BREW=true
+            ;;
+
+        --nvim)
+            NVIM=true
             ;;
 
         --minimal)
@@ -69,11 +74,17 @@ if [[ "$BREW" == true && "$FULL" != true ]]; then
     exit 1
 fi
 
+if [[ "$NVIM" == true && "$MINIMAL" == true ]]; then
+    echo "[ERROR] --nvim cannot be combined with --minimal."
+    exit 1
+fi
+
 if [[ "$DOCTOR" == true ]]; then
 
     if [[ "$FULL" == true ||
           "$MINIMAL" == true ||
-          "$DRY_RUN" == true ]]; then
+          "$DRY_RUN" == true ||
+          "$NVIM" == true ]]; then
 
         echo "[ERROR] --doctor cannot be combined with installation flags."
         exit 1
@@ -159,6 +170,13 @@ fi
 
 if [[ "$BREW" == true ]]; then
     required_files+=("$DOTFILES_DIR/brew/Brewfile")
+fi
+
+if [[ "$NVIM" == true ]]; then
+    required_files+=(
+        "$DOTFILES_DIR/nvim/init.lua"
+        "$DOTFILES_DIR/scripts/install-nvim.sh"
+    )
 fi
 
 for source in "${required_files[@]}"; do
@@ -343,6 +361,24 @@ if [[ "$FULL" == true ]]; then
     else
 
         bash "$DOTFILES_DIR/scripts/setup-tmux.sh"
+
+    fi
+
+fi
+
+# ============================================================
+# Neovim Configuration
+# ============================================================
+
+if [[ "$NVIM" == true ]]; then
+
+    if [[ "$DRY_RUN" == true ]]; then
+
+        bash "$DOTFILES_DIR/scripts/install-nvim.sh" --dry-run
+
+    else
+
+        bash "$DOTFILES_DIR/scripts/install-nvim.sh"
 
     fi
 
