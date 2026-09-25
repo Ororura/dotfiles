@@ -81,6 +81,8 @@ echo "Checking required files..."
 required_files=(
     "$DOTFILES_DIR/zsh/.zshrc"
     "$DOTFILES_DIR/tmux/tmux.conf"
+    "$DOTFILES_DIR/git/config"
+    "$DOTFILES_DIR/scripts/install-git.sh"
 )
 
 if [[ "$FULL" == true ]]; then
@@ -208,6 +210,24 @@ if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
     install_link \
         "$DOTFILES_DIR/zsh/.p10k.zsh" \
         "$HOME/.p10k.zsh"
+
+fi
+
+# ============================================================
+# Git Configuration
+# ============================================================
+
+echo
+echo "Installing Git configuration..."
+echo
+
+if [[ "$DRY_RUN" == true ]]; then
+
+    echo "[DRY RUN] Would configure Git include.path."
+
+else
+
+    bash "$DOTFILES_DIR/scripts/install-git.sh"
 
 fi
 

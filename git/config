@@ -1,0 +1,24 @@
+# ============================================================
+# Shared Git Configuration
+# macOS / Linux
+# ============================================================
+
+[init]
+    defaultBranch = main
+
+[core]
+    autocrlf = input
+
+[fetch]
+    prune = true
+
+[pull]
+    ff = only
+
+[push]
+    autoSetupRemote = true
+
+[alias]
+    s = status --short --branch
+    b = branch -vv
+    lg = log --graph --decorate --oneline -20
