@@ -88,6 +88,7 @@ required_files=(
 if [[ "$FULL" == true ]]; then
     required_files+=(
         "$DOTFILES_DIR/scripts/install-deps.sh"
+        "$DOTFILES_DIR/scripts/setup-git-ai.sh"
     )
 fi
 
@@ -228,6 +229,24 @@ if [[ "$DRY_RUN" == true ]]; then
 else
 
     bash "$DOTFILES_DIR/scripts/install-git.sh"
+
+fi
+
+# ============================================================
+# Git AI Setup
+# ============================================================
+
+if [[ "$FULL" == true ]]; then
+
+    if [[ "$DRY_RUN" == true ]]; then
+
+        echo "[DRY RUN] Would check Git AI dependencies."
+
+    else
+
+        bash "$DOTFILES_DIR/scripts/setup-git-ai.sh"
+
+    fi
 
 fi
 
