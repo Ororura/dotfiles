@@ -1,0 +1,15 @@
+font-family = JetBrainsMono Nerd Font Mono
+font-style = Medium
+macos-option-as-alt = true
+# copy-on-select = clipboard
+# clipboard-trim-trailing-spaces = true
+
+# Match macOS appearance with the built-in Xcode palette.
+theme = Xcode Dark
+window-theme = auto
+initial-window = true
+resize-overlay = never
+window-save-state = always
+window-step-resize = false
+window-padding-balance = true
+confirm-close-surface = false

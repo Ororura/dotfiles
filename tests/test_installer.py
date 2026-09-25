@@ -233,5 +233,70 @@ class InstallerTests(unittest.TestCase):
             "original configuration\n",
         )
 
+
+    def test_ghostty_install_and_repeat(self):
+
+        home = Path(self.home.name)
+
+        self.env["GIT_CONFIG_GLOBAL"] = str(
+            home / ".gitconfig"
+        )
+
+        self.env["XDG_CONFIG_HOME"] = str(
+            home / ".config"
+        )
+
+        config_dir = home / ".config" / "ghostty"
+        config_dir.mkdir(parents=True)
+
+        target = config_dir / "config"
+        target.write_text("font-size = 12\\n")
+
+        first = self.run_installer("--ghostty")
+
+        self.assertEqual(
+            first.returncode,
+            0,
+            first.stdout + first.stderr,
+        )
+
+        self.assertTrue(target.is_symlink())
+
+        self.assertEqual(
+            target.resolve(),
+            ROOT / "ghostty" / "config",
+        )
+
+        backups = list(
+            home.glob(
+                ".dotfiles-backups/ghostty-*/config"
+            )
+        )
+
+        self.assertEqual(len(backups), 1)
+
+        self.assertEqual(
+            backups[0].read_text(),
+            "font-size = 12\\n",
+        )
+
+        second = self.run_installer("--ghostty")
+
+        self.assertEqual(
+            second.returncode,
+            0,
+            second.stdout + second.stderr,
+        )
+
+        self.assertEqual(
+            len(list(
+                home.glob(
+                    ".dotfiles-backups/ghostty-*/config"
+                )
+            )),
+            1,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
