@@ -3,7 +3,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(
-    cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P
+  cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P
 )"
 
 DRY_RUN=false
@@ -11,6 +11,7 @@ FULL=false
 MINIMAL=false
 DOCTOR=false
 BREW=false
+DNF=false
 NVIM=false
 GHOSTTY=false
 BACKUP_DIR=""
@@ -21,47 +22,51 @@ BACKUP_DIR=""
 
 for arg in "$@"; do
 
-    case "$arg" in
+  case "$arg" in
 
-        --dry-run)
-            DRY_RUN=true
-            ;;
+  --dry-run)
+    DRY_RUN=true
+    ;;
 
-        --full)
-            FULL=true
-            ;;
+  --full)
+    FULL=true
+    ;;
 
-        --brew)
-            BREW=true
-            ;;
+  --brew)
+    BREW=true
+    ;;
 
-        --nvim)
-            NVIM=true
-            ;;
+  --dnf)
+    DNF=true
+    ;;
 
-        --ghostty)
-            GHOSTTY=true
-            ;;
+  --nvim)
+    NVIM=true
+    ;;
 
-        --minimal)
-            MINIMAL=true
-            ;;
+  --ghostty)
+    GHOSTTY=true
+    ;;
 
-        --doctor)
-            DOCTOR=true
-            ;;
+  --minimal)
+    MINIMAL=true
+    ;;
 
-        --help)
-            echo "Usage: ./install.sh [--full [--brew] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
-            exit 0
-            ;;
+  --doctor)
+    DOCTOR=true
+    ;;
 
-        *)
-            echo "Unknown argument: $arg"
-            exit 1
-            ;;
+  --help)
+    echo "Usage: ./install.sh [--full [--brew | --dnf] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
+    exit 0
+    ;;
 
-    esac
+  *)
+    echo "Unknown argument: $arg"
+    exit 1
+    ;;
+
+  esac
 
 done
 
@@ -70,47 +75,66 @@ done
 # ============================================================
 
 if [[ "$FULL" == true && "$MINIMAL" == true ]]; then
-    echo "[ERROR] --full and --minimal cannot be combined."
-    exit 1
+  echo "[ERROR] --full and --minimal cannot be combined."
+  exit 1
 fi
 
 if [[ "$BREW" == true && "$FULL" != true ]]; then
-    echo "[ERROR] --brew requires --full."
-    exit 1
+  echo "[ERROR] --brew requires --full."
+  exit 1
+fi
+
+if [[ "$DNF" == true && "$FULL" != true ]]; then
+  echo "[ERROR] --dnf requires --full."
+  exit 1
+fi
+
+if [[ "$DNF" == true ]] &&
+  { [[ "$(uname -s)" != Linux ]] ||
+    ! command -v dnf >/dev/null 2>&1; }; then
+
+  echo "[ERROR] --dnf requires a Linux system with DNF."
+  exit 1
+fi
+
+if [[ "$BREW" == true && "$DNF" == true ]]; then
+  echo "[ERROR] --brew and --dnf cannot be combined."
+  exit 1
 fi
 
 if [[ "$NVIM" == true && "$MINIMAL" == true ]]; then
-    echo "[ERROR] --nvim cannot be combined with --minimal."
-    exit 1
+  echo "[ERROR] --nvim cannot be combined with --minimal."
+  exit 1
 fi
 
 if [[ "$GHOSTTY" == true && "$MINIMAL" == true ]]; then
-    echo "[ERROR] --ghostty cannot be combined with --minimal."
-    exit 1
+  echo "[ERROR] --ghostty cannot be combined with --minimal."
+  exit 1
 fi
 
 if [[ "$DOCTOR" == true ]]; then
 
-    if [[ "$FULL" == true ||
-          "$MINIMAL" == true ||
-          "$DRY_RUN" == true ||
-          "$NVIM" == true ||
-          "$GHOSTTY" == true ]]; then
+  if [[ "$FULL" == true ||
+    "$MINIMAL" == true ||
+    "$DRY_RUN" == true ||
+    "$NVIM" == true ||
+    "$DNF" == true ||
+    "$GHOSTTY" == true ]]; then
 
-        echo "[ERROR] --doctor cannot be combined with installation flags."
-        exit 1
+    echo "[ERROR] --doctor cannot be combined with installation flags."
+    exit 1
 
-    fi
+  fi
 
-    bash "$DOTFILES_DIR/scripts/doctor.sh"
-    exit $?
+  bash "$DOTFILES_DIR/scripts/doctor.sh"
+  exit $?
 
 fi
 
 if ! command -v git >/dev/null 2>&1; then
 
-    echo "[ERROR] Git is required for installation."
-    exit 1
+  echo "[ERROR] Git is required for installation."
+  exit 1
 
 fi
 
@@ -122,18 +146,18 @@ OS="$(uname -s)"
 
 case "$OS" in
 
-    Darwin)
-        PLATFORM="macOS"
-        ;;
+Darwin)
+  PLATFORM="macOS"
+  ;;
 
-    Linux)
-        PLATFORM="Linux"
-        ;;
+Linux)
+  PLATFORM="Linux"
+  ;;
 
-    *)
-        echo "Unsupported OS: $OS"
-        exit 1
-        ;;
+*)
+  echo "Unsupported OS: $OS"
+  exit 1
+  ;;
 
 esac
 
@@ -143,8 +167,8 @@ echo " Dotfiles Installer"
 echo "================================"
 echo
 if [[ "$BREW" == true && "$OS" != Darwin ]]; then
-    echo "[ERROR] --brew is supported only on macOS."
-    exit 1
+  echo "[ERROR] --brew is supported only on macOS."
+  exit 1
 fi
 
 echo "Platform: $PLATFORM"
@@ -158,55 +182,62 @@ echo
 echo "Checking required files..."
 
 required_files=(
-    "$DOTFILES_DIR/zsh/.zshrc"
-    "$DOTFILES_DIR/git/config"
-    "$DOTFILES_DIR/scripts/install-git.sh"
+  "$DOTFILES_DIR/zsh/.zshrc"
+  "$DOTFILES_DIR/git/config"
+  "$DOTFILES_DIR/scripts/install-git.sh"
 )
+
+if [[ "$DNF" == true ]]; then
+  required_files+=(
+    "$DOTFILES_DIR/dnf/packages.txt"
+    "$DOTFILES_DIR/scripts/install-dnf.sh"
+  )
+fi
 
 if [[ "$MINIMAL" == false ]]; then
 
-    required_files+=(
-        "$DOTFILES_DIR/tmux/tmux.conf"
-    )
+  required_files+=(
+    "$DOTFILES_DIR/tmux/tmux.conf"
+  )
 
 fi
 
 if [[ "$FULL" == true ]]; then
-    required_files+=(
-        "$DOTFILES_DIR/scripts/install-deps.sh"
-        "$DOTFILES_DIR/scripts/setup-git-ai.sh"
-        "$DOTFILES_DIR/scripts/setup-tmux.sh"
-    )
+  required_files+=(
+    "$DOTFILES_DIR/scripts/install-deps.sh"
+    "$DOTFILES_DIR/scripts/setup-git-ai.sh"
+    "$DOTFILES_DIR/scripts/setup-tmux.sh"
+  )
 fi
 
 if [[ "$BREW" == true ]]; then
-    required_files+=("$DOTFILES_DIR/brew/Brewfile")
+  required_files+=("$DOTFILES_DIR/brew/Brewfile")
 fi
 
 if [[ "$NVIM" == true ]]; then
-    required_files+=(
-        "$DOTFILES_DIR/nvim/init.lua"
-        "$DOTFILES_DIR/scripts/install-nvim.sh"
-    )
+  required_files+=(
+    "$DOTFILES_DIR/nvim/init.lua"
+    "$DOTFILES_DIR/scripts/install-nvim.sh"
+  )
 fi
 
 if [[ "$GHOSTTY" == true ]]; then
-    required_files+=(
-        "$DOTFILES_DIR/ghostty/config"
-        "$DOTFILES_DIR/scripts/install-ghostty.sh"
-    )
+  required_files+=(
+    "$DOTFILES_DIR/ghostty/config"
+    "$DOTFILES_DIR/scripts/install-ghostty.sh"
+  )
 fi
 
 for source in "${required_files[@]}"; do
 
-    if [[ ! -f "$source" ]]; then
+  if [[ ! -f "$source" ]]; then
 
-        echo "[ERROR] Required file not found: $source"
-        exit 1
+    echo "[ERROR] Required file not found: $source"
+    exit 1
 
-    fi
+  fi
 
-    echo "[OK] $source"
+  echo "[OK] $source"
 
 done
 
@@ -218,15 +249,15 @@ echo
 
 if [[ "$FULL" == true ]]; then
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        echo "[DRY RUN] Would install terminal dependencies."
+    echo "[DRY RUN] Would install terminal dependencies."
 
-    else
+  else
 
-        bash "$DOTFILES_DIR/scripts/install-deps.sh"
+    bash "$DOTFILES_DIR/scripts/install-deps.sh"
 
-    fi
+  fi
 
 fi
 
@@ -236,36 +267,54 @@ fi
 
 if [[ "$BREW" == true ]]; then
 
-    echo
-    echo "Homebrew Bundle:"
-    echo
+  echo
+  echo "Homebrew Bundle:"
+  echo
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        echo "[DRY RUN] Would install brew/Brewfile."
+    echo "[DRY RUN] Would install brew/Brewfile."
+
+  else
+
+    if command -v brew >/dev/null 2>&1; then
+      BREW_BIN="$(command -v brew)"
+
+    elif [[ -x /opt/homebrew/bin/brew ]]; then
+      BREW_BIN=/opt/homebrew/bin/brew
+
+    elif [[ -x /usr/local/bin/brew ]]; then
+      BREW_BIN=/usr/local/bin/brew
 
     else
-
-        if command -v brew >/dev/null 2>&1; then
-            BREW_BIN="$(command -v brew)"
-
-        elif [[ -x /opt/homebrew/bin/brew ]]; then
-            BREW_BIN=/opt/homebrew/bin/brew
-
-        elif [[ -x /usr/local/bin/brew ]]; then
-            BREW_BIN=/usr/local/bin/brew
-
-        else
-            echo "[ERROR] Homebrew is not installed."
-            echo "Install Homebrew before using --brew."
-            exit 1
-        fi
-
-        "$BREW_BIN" bundle install \
-            --file="$DOTFILES_DIR/brew/Brewfile" \
-            --no-upgrade
-
+      echo "[ERROR] Homebrew is not installed."
+      echo "Install Homebrew before using --brew."
+      exit 1
     fi
+
+    "$BREW_BIN" bundle install \
+      --file="$DOTFILES_DIR/brew/Brewfile" \
+      --no-upgrade
+
+  fi
+
+fi
+
+# ============================================================
+# DNF Bundle (Fedora, opt-in)
+# ============================================================
+
+if [[ "$DNF" == true ]]; then
+
+  if [[ "$DRY_RUN" == true ]]; then
+
+    bash "$DOTFILES_DIR/scripts/install-dnf.sh" --dry-run
+
+  else
+
+    bash "$DOTFILES_DIR/scripts/install-dnf.sh"
+
+  fi
 
 fi
 
@@ -275,62 +324,62 @@ fi
 
 install_link() {
 
-    local source="$1"
-    local target="$2"
+  local source="$1"
+  local target="$2"
 
-    if [[ ! -f "$source" ]]; then
+  if [[ ! -f "$source" ]]; then
 
-        echo "Source not found: $source"
-        return 1
+    echo "Source not found: $source"
+    return 1
 
-    fi
+  fi
 
-    if [[ -L "$target" ]] &&
-       [[ "$(readlink "$target")" == "$source" ]]; then
+  if [[ -L "$target" ]] &&
+    [[ "$(readlink "$target")" == "$source" ]]; then
 
-        echo "[OK] $target"
-        return
+    echo "[OK] $target"
+    return
 
-    fi
+  fi
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        echo "[DRY RUN] $target -> $source"
-
-        if [[ -e "$target" || -L "$target" ]]; then
-            echo "[DRY RUN] Would backup $target"
-        fi
-
-        return
-
-    fi
-
-    # Backup existing file
+    echo "[DRY RUN] $target -> $source"
 
     if [[ -e "$target" || -L "$target" ]]; then
+      echo "[DRY RUN] Would backup $target"
+    fi
 
-        if [[ -z "$BACKUP_DIR" ]]; then
+    return
 
-            mkdir -p "$HOME/.dotfiles-backups"
+  fi
 
-            BACKUP_DIR="$(
-                mktemp -d \
-                    "$HOME/.dotfiles-backups/$(date +%Y%m%d-%H%M%S).XXXXXX"
-            )"
+  # Backup existing file
 
-        fi
+  if [[ -e "$target" || -L "$target" ]]; then
 
-        mv "$target" "$BACKUP_DIR/$(basename "$target")"
+    if [[ -z "$BACKUP_DIR" ]]; then
 
-        echo "[BACKUP] $target"
+      mkdir -p "$HOME/.dotfiles-backups"
+
+      BACKUP_DIR="$(
+        mktemp -d \
+          "$HOME/.dotfiles-backups/$(date +%Y%m%d-%H%M%S).XXXXXX"
+      )"
 
     fi
 
-    # Create symlink
+    mv "$target" "$BACKUP_DIR/$(basename "$target")"
 
-    ln -s "$source" "$target"
+    echo "[BACKUP] $target"
 
-    echo "[INSTALLED] $target"
+  fi
+
+  # Create symlink
+
+  ln -s "$source" "$target"
+
+  echo "[INSTALLED] $target"
 
 }
 
@@ -343,22 +392,22 @@ echo "Installing configurations..."
 echo
 
 install_link \
-    "$DOTFILES_DIR/zsh/.zshrc" \
-    "$HOME/.zshrc"
+  "$DOTFILES_DIR/zsh/.zshrc" \
+  "$HOME/.zshrc"
 
 if [[ "$MINIMAL" == false ]]; then
 
+  install_link \
+    "$DOTFILES_DIR/tmux/tmux.conf" \
+    "$HOME/.tmux.conf"
+
+  if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
+
     install_link \
-        "$DOTFILES_DIR/tmux/tmux.conf" \
-        "$HOME/.tmux.conf"
+      "$DOTFILES_DIR/zsh/.p10k.zsh" \
+      "$HOME/.p10k.zsh"
 
-    if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
-
-        install_link \
-            "$DOTFILES_DIR/zsh/.p10k.zsh" \
-            "$HOME/.p10k.zsh"
-
-    fi
+  fi
 
 fi
 
@@ -368,19 +417,19 @@ fi
 
 if [[ "$FULL" == true ]]; then
 
-    echo
-    echo "Setting up tmux plugins..."
-    echo
+  echo
+  echo "Setting up tmux plugins..."
+  echo
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        echo "[DRY RUN] Would install TPM and tmux plugins."
+    echo "[DRY RUN] Would install TPM and tmux plugins."
 
-    else
+  else
 
-        bash "$DOTFILES_DIR/scripts/setup-tmux.sh"
+    bash "$DOTFILES_DIR/scripts/setup-tmux.sh"
 
-    fi
+  fi
 
 fi
 
@@ -390,15 +439,15 @@ fi
 
 if [[ "$NVIM" == true ]]; then
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        bash "$DOTFILES_DIR/scripts/install-nvim.sh" --dry-run
+    bash "$DOTFILES_DIR/scripts/install-nvim.sh" --dry-run
 
-    else
+  else
 
-        bash "$DOTFILES_DIR/scripts/install-nvim.sh"
+    bash "$DOTFILES_DIR/scripts/install-nvim.sh"
 
-    fi
+  fi
 
 fi
 
@@ -408,11 +457,11 @@ fi
 
 if [[ "$GHOSTTY" == true ]]; then
 
-    if [[ "$DRY_RUN" == true ]]; then
-        bash "$DOTFILES_DIR/scripts/install-ghostty.sh" --dry-run
-    else
-        bash "$DOTFILES_DIR/scripts/install-ghostty.sh"
-    fi
+  if [[ "$DRY_RUN" == true ]]; then
+    bash "$DOTFILES_DIR/scripts/install-ghostty.sh" --dry-run
+  else
+    bash "$DOTFILES_DIR/scripts/install-ghostty.sh"
+  fi
 
 fi
 
@@ -426,11 +475,11 @@ echo
 
 if [[ "$DRY_RUN" == true ]]; then
 
-    echo "[DRY RUN] Would configure Git include.path."
+  echo "[DRY RUN] Would configure Git include.path."
 
 else
 
-    bash "$DOTFILES_DIR/scripts/install-git.sh"
+  bash "$DOTFILES_DIR/scripts/install-git.sh"
 
 fi
 
@@ -440,15 +489,15 @@ fi
 
 if [[ "$FULL" == true ]]; then
 
-    if [[ "$DRY_RUN" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
 
-        echo "[DRY RUN] Would check Git AI dependencies."
+    echo "[DRY RUN] Would check Git AI dependencies."
 
-    else
+  else
 
-        bash "$DOTFILES_DIR/scripts/setup-git-ai.sh"
+    bash "$DOTFILES_DIR/scripts/setup-git-ai.sh"
 
-    fi
+  fi
 
 fi
 
@@ -460,17 +509,17 @@ echo
 
 if [[ "$DRY_RUN" == true ]]; then
 
-    echo "Dry run completed. No changes made."
+  echo "Dry run completed. No changes made."
 
 else
 
-    echo "Dotfiles installed successfully."
+  echo "Dotfiles installed successfully."
 
-    if [[ -n "$BACKUP_DIR" ]]; then
-        echo "Backup directory: $BACKUP_DIR"
-    fi
+  if [[ -n "$BACKUP_DIR" ]]; then
+    echo "Backup directory: $BACKUP_DIR"
+  fi
 
-    echo
-    echo "Restart your shell with: exec zsh"
+  echo
+  echo "Restart your shell with: exec zsh"
 
 fi
