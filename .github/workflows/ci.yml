@@ -1,0 +1,70 @@
+name: Dotfiles CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Dotfiles
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Zsh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh
+
+      - name: Check Bash syntax
+        run: |
+          set -euo pipefail
+
+          bash -n install.sh
+
+          for file in scripts/*.sh; do
+            bash -n "$file"
+          done
+
+          bash -n .bashrc
+
+      - name: Check Zsh syntax
+        run: |
+          set -euo pipefail
+
+          for file in zsh/.zshrc zsh/*.zsh; do
+            zsh -n "$file"
+          done
+
+      - name: Check Python syntax
+        run: |
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+
+          files = Path("git/scripts").glob("*.py")
+
+          for file in files:
+
+              ast.parse(
+                  file.read_text(),
+                  filename=str(file),
+              )
+
+              print(f"[OK] {file}")
+          PY
+
+      - name: Run Git AI tests
+        run: |
+          python3 -m unittest discover -s tests -v
