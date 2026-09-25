@@ -22,3 +22,12 @@
     s = status --short --branch
     b = branch -vv
     lg = log --graph --decorate --oneline -20
+	ai-msg = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-msg.py\"
+	ai-branch = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-branch.py\"
+	ai-review = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-tools.py\" review
+	ai-pr = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-tools.py\" pr
+	ai-changelog = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-tools.py\" changelog
+	ai-split = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-tools.py\" split
+	ai-explain = !python3 \"$HOME/.dotfiles/git/scripts/git-ai-tools.py\" explain
+	ai-commit = "!f() { msg=$(git ai-msg) || return; git commit -e -m \"$msg\"; }; f"
+	ai-publish = "!f() {\n  git push -u origin HEAD || return\n  file=$(mktemp) || return\n  git ai-pr --base main > \"$file\" || return\n  ${EDITOR:-vim} \"$file\"\n  gh pr create --base main --fill --body-file \"$file\"\n  result=$?\n  rm -f \"$file\"\n  return \"$result\"\n}; f"
