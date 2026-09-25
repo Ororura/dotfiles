@@ -1,2 +1,0 @@
-fig
-font-fira-code
