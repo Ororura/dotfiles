@@ -73,6 +73,38 @@ echo "Directory: $DOTFILES_DIR"
 echo
 
 # ============================================================
+# Preflight Checks
+# ============================================================
+
+echo "Checking required files..."
+
+required_files=(
+    "$DOTFILES_DIR/zsh/.zshrc"
+    "$DOTFILES_DIR/tmux/tmux.conf"
+)
+
+if [[ "$FULL" == true ]]; then
+    required_files+=(
+        "$DOTFILES_DIR/scripts/install-deps.sh"
+    )
+fi
+
+for source in "${required_files[@]}"; do
+
+    if [[ ! -f "$source" ]]; then
+
+        echo "[ERROR] Required file not found: $source"
+        exit 1
+
+    fi
+
+    echo "[OK] $source"
+
+done
+
+echo
+
+# ============================================================
 # Dependencies
 # ============================================================
 
