@@ -10,6 +10,7 @@ DRY_RUN=false
 FULL=false
 MINIMAL=false
 DOCTOR=false
+BREW=false
 BACKUP_DIR=""
 
 # ============================================================
@@ -28,6 +29,10 @@ for arg in "$@"; do
             FULL=true
             ;;
 
+        --brew)
+            BREW=true
+            ;;
+
         --minimal)
             MINIMAL=true
             ;;
@@ -37,7 +42,7 @@ for arg in "$@"; do
             ;;
 
         --help)
-            echo "Usage: ./install.sh [--full | --minimal | --doctor] [--dry-run]"
+            echo "Usage: ./install.sh [--full [--brew] | --minimal | --doctor] [--dry-run]"
             exit 0
             ;;
 
@@ -56,6 +61,11 @@ done
 
 if [[ "$FULL" == true && "$MINIMAL" == true ]]; then
     echo "[ERROR] --full and --minimal cannot be combined."
+    exit 1
+fi
+
+if [[ "$BREW" == true && "$FULL" != true ]]; then
+    echo "[ERROR] --brew requires --full."
     exit 1
 fi
 
@@ -110,6 +120,11 @@ echo "================================"
 echo " Dotfiles Installer"
 echo "================================"
 echo
+if [[ "$BREW" == true && "$OS" != Darwin ]]; then
+    echo "[ERROR] --brew is supported only on macOS."
+    exit 1
+fi
+
 echo "Platform: $PLATFORM"
 echo "Directory: $DOTFILES_DIR"
 echo
@@ -138,6 +153,7 @@ if [[ "$FULL" == true ]]; then
     required_files+=(
         "$DOTFILES_DIR/scripts/install-deps.sh"
         "$DOTFILES_DIR/scripts/setup-git-ai.sh"
+        "$DOTFILES_DIR/scripts/setup-tmux.sh"
     )
 fi
 
@@ -156,6 +172,10 @@ done
 
 echo
 
+if [[ "$BREW" == true ]]; then
+    required_files+=("$DOTFILES_DIR/brew/Brewfile")
+fi
+
 # ============================================================
 # Dependencies
 # ============================================================
@@ -169,6 +189,45 @@ if [[ "$FULL" == true ]]; then
     else
 
         bash "$DOTFILES_DIR/scripts/install-deps.sh"
+
+    fi
+
+fi
+
+# ============================================================
+# Homebrew Bundle (macOS, opt-in)
+# ============================================================
+
+if [[ "$BREW" == true ]]; then
+
+    echo
+    echo "Homebrew Bundle:"
+    echo
+
+    if [[ "$DRY_RUN" == true ]]; then
+
+        echo "[DRY RUN] Would install brew/Brewfile."
+
+    else
+
+        if command -v brew >/dev/null 2>&1; then
+            BREW_BIN="$(command -v brew)"
+
+        elif [[ -x /opt/homebrew/bin/brew ]]; then
+            BREW_BIN=/opt/homebrew/bin/brew
+
+        elif [[ -x /usr/local/bin/brew ]]; then
+            BREW_BIN=/usr/local/bin/brew
+
+        else
+            echo "[ERROR] Homebrew is not installed."
+            echo "Install Homebrew before using --brew."
+            exit 1
+        fi
+
+        "$BREW_BIN" bundle install \
+            --file="$DOTFILES_DIR/brew/Brewfile" \
+            --no-upgrade
 
     fi
 
@@ -262,6 +321,28 @@ if [[ "$MINIMAL" == false ]]; then
         install_link \
             "$DOTFILES_DIR/zsh/.p10k.zsh" \
             "$HOME/.p10k.zsh"
+
+    fi
+
+fi
+
+# ============================================================
+# tmux Plugins
+# ============================================================
+
+if [[ "$FULL" == true ]]; then
+
+    echo
+    echo "Setting up tmux plugins..."
+    echo
+
+    if [[ "$DRY_RUN" == true ]]; then
+
+        echo "[DRY RUN] Would install TPM and tmux plugins."
+
+    else
+
+        bash "$DOTFILES_DIR/scripts/setup-tmux.sh"
 
     fi
 

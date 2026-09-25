@@ -145,6 +145,26 @@ check_link \
     false
 
 # ============================================================
+# TPM
+# ============================================================
+
+echo
+echo "tmux Plugin Manager:"
+echo
+
+if [[ -f "$HOME/.tmux/plugins/tpm/tpm" &&
+      -f "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]]; then
+
+    echo "[OK] TPM installed"
+
+else
+
+    echo "[WARNING] TPM not installed"
+    echo "Run ./install.sh --full to install tmux plugins."
+
+fi
+
+# ============================================================
 # Powerlevel10k
 # ============================================================
 
