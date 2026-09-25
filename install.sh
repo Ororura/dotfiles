@@ -12,6 +12,7 @@ MINIMAL=false
 DOCTOR=false
 BREW=false
 NVIM=false
+GHOSTTY=false
 BACKUP_DIR=""
 
 # ============================================================
@@ -38,6 +39,10 @@ for arg in "$@"; do
             NVIM=true
             ;;
 
+        --ghostty)
+            GHOSTTY=true
+            ;;
+
         --minimal)
             MINIMAL=true
             ;;
@@ -47,7 +52,7 @@ for arg in "$@"; do
             ;;
 
         --help)
-            echo "Usage: ./install.sh [--full [--brew] | --minimal | --doctor] [--dry-run]"
+            echo "Usage: ./install.sh [--full [--brew] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
             exit 0
             ;;
 
@@ -79,12 +84,18 @@ if [[ "$NVIM" == true && "$MINIMAL" == true ]]; then
     exit 1
 fi
 
+if [[ "$GHOSTTY" == true && "$MINIMAL" == true ]]; then
+    echo "[ERROR] --ghostty cannot be combined with --minimal."
+    exit 1
+fi
+
 if [[ "$DOCTOR" == true ]]; then
 
     if [[ "$FULL" == true ||
           "$MINIMAL" == true ||
           "$DRY_RUN" == true ||
-          "$NVIM" == true ]]; then
+          "$NVIM" == true ||
+          "$GHOSTTY" == true ]]; then
 
         echo "[ERROR] --doctor cannot be combined with installation flags."
         exit 1
@@ -176,6 +187,13 @@ if [[ "$NVIM" == true ]]; then
     required_files+=(
         "$DOTFILES_DIR/nvim/init.lua"
         "$DOTFILES_DIR/scripts/install-nvim.sh"
+    )
+fi
+
+if [[ "$GHOSTTY" == true ]]; then
+    required_files+=(
+        "$DOTFILES_DIR/ghostty/config"
+        "$DOTFILES_DIR/scripts/install-ghostty.sh"
     )
 fi
 
@@ -380,6 +398,20 @@ if [[ "$NVIM" == true ]]; then
 
         bash "$DOTFILES_DIR/scripts/install-nvim.sh"
 
+    fi
+
+fi
+
+# ============================================================
+# Ghostty Configuration
+# ============================================================
+
+if [[ "$GHOSTTY" == true ]]; then
+
+    if [[ "$DRY_RUN" == true ]]; then
+        bash "$DOTFILES_DIR/scripts/install-ghostty.sh" --dry-run
+    else
+        bash "$DOTFILES_DIR/scripts/install-ghostty.sh"
     fi
 
 fi

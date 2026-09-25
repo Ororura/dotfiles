@@ -26,11 +26,11 @@ brew "zoxide"
 brew "tmux"
 brew "neovim"
 
-brew "htop"
 brew "ncdu"
 brew "tldr"
 brew "tree"
 brew "tokei"
+brew "btop"
 
 
 # ============================================================
