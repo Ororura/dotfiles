@@ -19,7 +19,9 @@ OLLAMA_URL = os.getenv(
     "http://127.0.0.1:11434/api/chat",
 )
 
-MAX_DIFF_LENGTH = 16000
+MAX_DIFF_LENGTH = int(
+    os.getenv("OLLAMA_COMMIT_MAX_DIFF_CHARS", "16000")
+)
 
 
 SYSTEM_PROMPT = """
