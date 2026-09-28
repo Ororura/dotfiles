@@ -63,6 +63,14 @@ class PureHelperTests(unittest.TestCase):
         self.assertIn("No commits", ai.publish_precondition("feat/x", "main", False, False, 0))
         self.assertIsNone(ai.publish_precondition("feat/x", "main", False, False, 1))
 
+    def test_split_output_rejects_invented_paths(self):
+        valid = '{"groups":[{"message":"feat: add app","files":["app.py"],"reason":"feature"}]}'
+        self.assertEqual(ai.parse_split_output(valid, ["app.py"])["groups"][0]["files"], ["app.py"])
+        with self.assertRaisesRegex(ValueError, "invented file paths"):
+            ai.parse_split_output(valid, ["other.py"])
+        with self.assertRaisesRegex(ValueError, "invalid split JSON"):
+            ai.parse_split_output('{"groups":["invalid"]}', ["app.py"])
+
 
 class GitRepositoryTests(unittest.TestCase):
     def setUp(self):

@@ -232,7 +232,8 @@ def summarize_diff(task, diff, model, purpose):
 def branch(args):
     description = " ".join(args.description).strip()
     if not description:
-        paths = sorted(set(changed_paths("--cached") + changed_paths()))
+        untracked = git("ls-files", "--others", "--exclude-standard", "-z").split("\0")
+        paths = sorted(set(changed_paths("--cached") + changed_paths() + [p for p in untracked if p]))
         block_sensitive(paths, args.allow_sensitive)
         status = git("status", "--short")
         if not status:
@@ -455,14 +456,8 @@ def split(args):
             args.model, max_tokens=2000, json_output=True,
         )
 
-    try:
-        plan = json.loads(output)
-        groups = plan["groups"]
-        if not isinstance(groups, list) or not groups:
-            raise ValueError("empty groups")
-    except (ValueError, KeyError, TypeError) as exc:
-        raise ValueError(f"Model returned invalid split JSON: {output[:400]}") from exc
-    known = set(files)
+    plan = parse_split_output(output, files)
+    groups = plan["groups"]
     mentioned = []
     lines = ["# Suggested commit split", "", "Plan only: no files, index, or commits have been changed."]
     if len(diff) > config()["max_diff"]:
@@ -470,15 +465,10 @@ def split(args):
     for number, group in enumerate(groups, 1):
         name = group.get("message", "(no message)")
         members = group.get("files", [])
-        if not isinstance(members, list):
-            raise ValueError("Model returned invalid files list")
-        unknown = [p for p in members if p not in known]
-        if unknown:
-            raise ValueError(f"Model invented file paths: {unknown}")
         mentioned.extend(members)
         lines += ["", f"## {number}. {name}", "", *[f"- `{p}`" for p in members],
                   f"\nWhy: {group.get('reason', '')}"]
-    missing = sorted(known - set(mentioned))
+    missing = sorted(set(files) - set(mentioned))
     repeated = sorted({p for p in mentioned if mentioned.count(p) > 1})
     if missing:
         lines += ["", "**Unassigned staged files:** " + ", ".join(f"`{p}`" for p in missing)]
@@ -490,6 +480,25 @@ def split(args):
     lines += ["", "To prepare one group: `git restore --staged .`, then `git add <file...>` "
               "or `git add -p`, verify with `git diff --cached`, and commit."]
     print("\n".join(lines))
+
+
+def parse_split_output(output, files):
+    try:
+        plan = json.loads(output)
+        groups = plan["groups"]
+        if not isinstance(groups, list) or not groups:
+            raise ValueError("empty groups")
+        for group in groups:
+            if not isinstance(group, dict) or not isinstance(group.get("message"), str) or not isinstance(group.get("files"), list):
+                raise ValueError("invalid group")
+            if not group["files"] or any(not isinstance(path, str) for path in group["files"]):
+                raise ValueError("invalid files list")
+            unknown = [path for path in group["files"] if path not in files]
+            if unknown:
+                raise ValueError(f"invented file paths: {unknown}")
+    except (ValueError, KeyError, TypeError) as exc:
+        raise ValueError(f"Model returned invalid split JSON: {str(exc)}; response: {output[:400]}") from exc
+    return plan
 
 
 def explain(args):
@@ -545,14 +554,11 @@ def publish(args):
     if result.returncode:
         raise CommandFailure("push did not complete; no PR was created", result.returncode)
 
-    existing = json.loads(gh("pr", "list", "--head", branch_name, "--state", "open", "--json", "url"))
+    existing = json.loads(gh("pr", "list", "--head", branch_name, "--state", "all", "--json", "url"))
     if existing:
         print(f"Existing PR: {existing[0]['url']}")
     else:
         body = pr_body(args, base)
-        title = body.splitlines()[0].lstrip("# ").strip()
-        if not title:
-            raise ValueError("AI returned a PR description without a title")
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".md", delete=False) as file:
             file.write(body + "\n")
             path = file.name
@@ -561,6 +567,10 @@ def publish(args):
             result = subprocess.run([*editor, path])
             if result.returncode:
                 raise CommandFailure("PR body editor failed", result.returncode)
+            lines = Path(path).read_text(encoding="utf-8").splitlines()
+            title = lines[0].lstrip("# ").strip() if lines else ""
+            if not title:
+                raise ValueError("PR description needs a title on its first line")
             print(gh("pr", "create", "--base", base.removeprefix("origin/"),
                      "--title", title, "--body-file", path))
         finally:
