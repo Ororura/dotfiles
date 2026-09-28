@@ -143,31 +143,32 @@ git config --global user.email "you@example.com"
 
 ## Git AI (local Ollama)
 
-The shared `git/config` defines these commands:
+The shared `git/config` defines one `git ai` alias:
 
 | Command | Action |
 | --- | --- |
-| `git ai-msg` | Generate a staged-diff commit message without committing. |
-| `git ai-commit` | Generate a message, open an editor, commit. |
-| `git ai-branch "describe the task"` | Suggest a branch name and ask before creating it. |
-| `git ai-review` | Review staged changes; `--worktree` reviews tracked changes relative to HEAD. |
-| `git ai-split` | Suggest groups of commits; does **not** modify Git or create commits. |
-| `git ai-pr --base main` | Describe **committed** branch changes for a PR. |
-| `git ai-publish` | Push the branch, draft a PR body, invoke GitHub CLI. |
-| `git ai-changelog --base v1.0.0` | Draft release notes from a tag/commit. |
-| `git ai-explain HEAD` | Explain a commit. |
+| `git ai branch "describe the task"` | Suggest a branch name and ask before creating it; without a description, inspect current changes. |
+| `git ai commit` | Generate a staged-diff message, show it, then open the Git commit editor after confirmation. |
+| `git ai review` | Review staged changes; `--worktree` reviews tracked changes relative to HEAD. |
+| `git ai split` | Suggest atomic commit groups and exact paths; does **not** change the index or commits. |
+| `git ai pr --base main` | Describe **committed** branch changes for a PR. |
+| `git ai publish` | Check a clean topic branch, push, reuse an open PR or edit and create one, then show PR and checks. |
+| `git ai changelog --base v1.0.0` | Draft release notes from a tag/commit. |
+| `git ai explain HEAD` | Explain a commit. |
 
 Typical flow:
 
 ~~~bash
 git add -p
 git diff --cached --check
-git ai-review
-git ai-commit
-git ai-publish
+git ai review
+git ai commit
+git ai publish
 ~~~
 
-The default model is `qwen3.5:9b` and the default endpoint is `http://127.0.0.1:11434/api/chat`. `git/ai.env.example` documents environment overrides. `--full` checks Git AI requirements; it does **not** install Ollama, pull a model, or log in to GitHub CLI. Use `gh auth login` separately if needed.
+The default model is `qwen3.5:9b` and the default endpoint is `http://127.0.0.1:11434/api/chat`. `git/ai.env.example` documents `OLLAMA_GIT_*` overrides. Large diffs are analyzed in file-aware parts; commit, PR, changelog, explain, and split use summaries of every part. `--full` checks Git AI requirements; it does **not** install Ollama, pull a model, or log in to GitHub CLI. Use `gh auth login` separately if needed.
+
+Migration: the old `git ai-*` aliases were removed. Use the corresponding `git ai <command>` form; there are no compatibility aliases to maintain alongside the new CLI.
 
 The AI tools inspect diffs. Review staged changes before invoking them: file-name safety checks cannot guarantee secret detection. If you configure a remote Ollama endpoint, the selected changes are sent to that server.
 
