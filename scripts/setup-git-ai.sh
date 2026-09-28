@@ -45,7 +45,7 @@ if command -v gh >/dev/null 2>&1; then
 else
 
     echo "[MISSING] GitHub CLI"
-    echo "Required for git ai-publish."
+    echo "Required for git ai publish."
 
 fi
 
