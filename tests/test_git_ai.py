@@ -56,6 +56,16 @@ class PureHelperTests(unittest.TestCase):
                                 if not line.startswith("[CONTINUATION:"))
         self.assertEqual(reconstructed, diff)
 
+    def test_compact_summaries_reads_every_part(self):
+        findings = [f"part-{n}: " + "x" * 900 for n in range(8)]
+        with patch.dict(os.environ, {"OLLAMA_GIT_MAX_DIFF_CHARS": "2000"}):
+            with patch.object(ai, "ask", return_value="combined findings") as request:
+                result = ai.compact_summaries("commit", findings, None)
+        self.assertLessEqual(len(result), 2000)
+        sent = " ".join(call.args[2] for call in request.call_args_list)
+        for n in range(8):
+            self.assertIn(f"part-{n}", sent)
+
     def test_publish_preconditions(self):
         self.assertIn("main", ai.publish_precondition("main", "origin/main", False, False, 1))
         self.assertIn("uncommitted", ai.publish_precondition("feat/x", "main", True, False, 1))

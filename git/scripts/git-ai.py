@@ -226,7 +226,30 @@ def summarize_diff(task, diff, model, purpose):
                       "A continuation is only part of a file. Do not invent changes.",
                       f"Part {index}/{len(chunks)}:\n{chunk}", model, max_tokens=240)
         evidence.append(f"Part {index}/{len(chunks)}: {summary}")
-    return "\n\n".join(evidence), True
+    return compact_summaries(task, evidence, model), True
+
+
+def compact_summaries(task, evidence, model):
+    """Keep final synthesis within the configured diff budget without dropping parts."""
+    limit = config()["max_diff"]
+    passes = 0
+    while len("\n\n".join(evidence)) > limit:
+        passes += 1
+        if passes > 10:
+            raise ValueError("diff summaries are still too large; raise OLLAMA_GIT_MAX_DIFF_CHARS")
+        batches = []
+        batch = []
+        for item in evidence:
+            if batch and len("\n\n".join(batch + [item])) > limit:
+                batches.append(batch)
+                batch = []
+            batch.append(item)
+        if batch:
+            batches.append(batch)
+        evidence = [ask(task, "Condense these diff findings faithfully in at most 120 words. "
+                        "Preserve paths, distinct changes and uncertainty; invent nothing.",
+                        "\n\n".join(batch), model, max_tokens=240) for batch in batches]
+    return "\n\n".join(evidence)
 
 
 def branch(args):
@@ -452,7 +475,7 @@ def split(args):
             "than one group and explain manual hunk-level separation in notes.",
             f"Exact staged paths:\n{json.dumps(files, ensure_ascii=False)}\n"
             f"Overall diff summary:\n{stat}\n\n"
-            f"Chunk findings:\n" + "\n\n".join(evidence),
+            f"Chunk findings:\n" + compact_summaries("split", evidence, args.model),
             args.model, max_tokens=2000, json_output=True,
         )
 
