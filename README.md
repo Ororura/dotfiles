@@ -1,6 +1,6 @@
 # Ororura Dotfiles
 
-Shared terminal and development configuration for **macOS, Fedora, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, and optional macOS Homebrew applications.
+Shared terminal and development configuration for **macOS, Fedora, Debian, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, and optional package bundles.
 
 > **Clone to `~/.dotfiles`.** The Zsh configuration and Git AI aliases currently depend on this path.
 
@@ -29,14 +29,10 @@ bash install.sh --doctor
 
 `--brew` installs the curated Brewfile (including Ghostty and Neovim), but does **not** install Homebrew itself.
 
-### Fedora / Ubuntu
+### Fedora
 
 ~~~bash
-# Fedora:
 sudo dnf install -y git bash
-
-# Ubuntu alternative:
-# sudo apt-get update && sudo apt-get install -y git bash
 
 git clone https://github.com/Ororura/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
@@ -48,7 +44,26 @@ exec zsh
 bash install.sh --doctor
 ~~~
 
-On Linux, **Neovim, Ghostty, Ollama, and an Ollama model are not installed automatically**. Install the applications separately; `--nvim` and `--ghostty` connect the tracked configs.
+### Debian / Ubuntu
+
+~~~bash
+sudo apt-get update && sudo apt-get install -y git bash
+git clone https://github.com/Ororura/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+cat apt/packages.txt
+bash install.sh --full --apt --dry-run
+bash install.sh --full --apt
+
+exec zsh
+bash install.sh --doctor
+~~~
+
+`--apt` installs the tools in `apt/packages.txt` from configured APT repositories. It works with `sudo` or as root; inspect the list and dry run first. On Debian the `bat` and `fd-find` packages provide commands named `batcat` and `fdfind`.
+
+Neovim is intentionally excluded from the APT bundle. Current LazyVim requires **Neovim 0.11.2+**, while [Debian 12 supplies 0.7.2](https://packages.debian.org/bookworm/neovim) and [Debian 13 supplies 0.10.4](https://packages.debian.org/trixie/neovim). Install a compatible Neovim using the [official installation instructions](https://neovim.io/doc/install/) and check `nvim --version` before running `bash install.sh --nvim`. `--nvim` only links the config. [LazyVim requirements](https://github.com/LazyVim/LazyVim#%EF%B8%8F-requirements).
+
+On Linux, **Ghostty, Ollama, and an Ollama model are not installed automatically**. Install them separately if needed; `--ghostty` only links the tracked config.
 
 The installer does not change your default login shell. `exec zsh` starts Zsh in the current terminal.
 
@@ -62,13 +77,15 @@ All commands below run from `~/.dotfiles`.
 | `bash install.sh --minimal` | Link only Zsh and Git configuration. Have Zsh installed beforehand. |
 | `bash install.sh --full` | Install missing terminal tools, Oh My Zsh/Powerlevel10k/Zsh plugins, TPM/tmux plugins; check Git AI dependencies. |
 | `bash install.sh --full --brew` | Also install `brew/Brewfile`; macOS only. |
+| `bash install.sh --full --dnf` | Also install `dnf/packages.txt`; Fedora only. |
+| `bash install.sh --full --apt` | Also install `apt/packages.txt`; Debian/Ubuntu with APT. |
 | `bash install.sh --nvim` | Also link Neovim config. |
 | `bash install.sh --ghostty` | Also link Ghostty config. |
 | `bash install.sh --nvim --ghostty` | Link both editor and terminal configs. |
 | `bash install.sh --dry-run` | Preview the selected operation without changes. |
 | `bash install.sh --doctor` | Diagnose configuration links and optional tools. |
 
-Combine `--nvim` and `--ghostty` with `--full` if desired. They cannot be combined with `--minimal`. `--brew` requires `--full`. `--doctor` is a standalone mode.
+Combine `--nvim` and `--ghostty` with `--full` if desired. They cannot be combined with `--minimal`. Package bundle flags require `--full` and are mutually exclusive. `--doctor` is a standalone mode.
 
 ### Installed links
 
@@ -96,6 +113,7 @@ All config files remain in the Git repository. A linked config updates immediate
 | Shared Git settings / aliases | `git/config` |
 | Git AI behavior | `git/scripts/`; defaults in `git/ai.env.example` |
 | Mac applications | `brew/Brewfile` |
+| Debian/Ubuntu packages | `apt/packages.txt` |
 | tmux keys and plugins | `tmux/tmux.conf` |
 | Neovim options / keymaps / plugins | `nvim/lua/config/` / `nvim/lua/plugins/` |
 | Ghostty font, colors, window settings | `ghostty/config` |
