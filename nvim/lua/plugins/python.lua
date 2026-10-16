@@ -23,12 +23,6 @@ return {
     },
   },
   {
-    "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = { python = { "ruff_organize_imports", "ruff_format" } },
-    },
-  },
-  {
     "mfussenegger/nvim-dap-python",
     config = function()
       local dp = require("dap-python")

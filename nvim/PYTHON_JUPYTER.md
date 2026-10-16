@@ -30,6 +30,7 @@ project dependencies or modify lockfiles.
 
 - `<leader>cpr`: run the current Python file.
 - `<leader>cf`: format; `.py` files also format automatically on save.
+  The shared Conform configuration runs Ruff fixes, import organization, then formatting.
 - `<leader>ca`: code actions, including Ruff fixes.
 - `K`: hover documentation; `gK`: signature help.
 - `<leader>db`: breakpoint; `<leader>dc`: run/continue.

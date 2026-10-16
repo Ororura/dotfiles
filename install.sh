@@ -12,6 +12,7 @@ MINIMAL=false
 DOCTOR=false
 BREW=false
 DNF=false
+APT=false
 NVIM=false
 GHOSTTY=false
 BACKUP_DIR=""
@@ -40,6 +41,10 @@ for arg in "$@"; do
     DNF=true
     ;;
 
+  --apt)
+    APT=true
+    ;;
+
   --nvim)
     NVIM=true
     ;;
@@ -57,7 +62,7 @@ for arg in "$@"; do
     ;;
 
   --help)
-    echo "Usage: ./install.sh [--full [--brew | --dnf] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
+    echo "Usage: ./install.sh [--full [--brew | --dnf | --apt] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
     exit 0
     ;;
 
@@ -89,6 +94,17 @@ if [[ "$DNF" == true && "$FULL" != true ]]; then
   exit 1
 fi
 
+if [[ "$APT" == true && "$FULL" != true ]]; then
+  echo "[ERROR] --apt requires --full."
+  exit 1
+fi
+
+if [[ "$BREW" == true && ( "$DNF" == true || "$APT" == true ) ]] ||
+   [[ "$DNF" == true && "$APT" == true ]]; then
+  echo "[ERROR] --brew, --dnf and --apt cannot be combined."
+  exit 1
+fi
+
 if [[ "$DNF" == true ]] &&
   { [[ "$(uname -s)" != Linux ]] ||
     ! command -v dnf >/dev/null 2>&1; }; then
@@ -97,8 +113,11 @@ if [[ "$DNF" == true ]] &&
   exit 1
 fi
 
-if [[ "$BREW" == true && "$DNF" == true ]]; then
-  echo "[ERROR] --brew and --dnf cannot be combined."
+if [[ "$APT" == true ]] &&
+  { [[ "$(uname -s)" != Linux ]] ||
+    ! command -v apt-get >/dev/null 2>&1; }; then
+
+  echo "[ERROR] --apt requires a Linux system with APT."
   exit 1
 fi
 
@@ -118,7 +137,9 @@ if [[ "$DOCTOR" == true ]]; then
     "$MINIMAL" == true ||
     "$DRY_RUN" == true ||
     "$NVIM" == true ||
+    "$BREW" == true ||
     "$DNF" == true ||
+    "$APT" == true ||
     "$GHOSTTY" == true ]]; then
 
     echo "[ERROR] --doctor cannot be combined with installation flags."
@@ -194,6 +215,13 @@ if [[ "$DNF" == true ]]; then
   )
 fi
 
+if [[ "$APT" == true ]]; then
+  required_files+=(
+    "$DOTFILES_DIR/apt/packages.txt"
+    "$DOTFILES_DIR/scripts/install-apt.sh"
+  )
+fi
+
 if [[ "$MINIMAL" == false ]]; then
 
   required_files+=(
@@ -246,6 +274,16 @@ echo
 # ============================================================
 # Dependencies
 # ============================================================
+
+# Install the APT bundle first so --full finds the basic tools already present
+# and does not refresh APT package indexes twice.
+if [[ "$APT" == true ]]; then
+  if [[ "$DRY_RUN" == true ]]; then
+    bash "$DOTFILES_DIR/scripts/install-apt.sh" --dry-run
+  else
+    bash "$DOTFILES_DIR/scripts/install-apt.sh"
+  fi
+fi
 
 if [[ "$FULL" == true ]]; then
 

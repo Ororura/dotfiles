@@ -86,6 +86,33 @@ class InstallerTests(unittest.TestCase):
             result.stdout,
         )
 
+    def test_apt_requires_full(self):
+        result = self.run_installer("--apt", "--dry-run")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("--apt requires --full", result.stdout)
+
+    def test_debian_apt_dry_run(self):
+        fake_bin = Path(self.home.name) / "bin"
+        fake_bin.mkdir()
+        for command, body in (("uname", "#!/bin/sh\necho Linux\n"),
+                              ("apt-get", "#!/bin/sh\nexit 0\n")):
+            path = fake_bin / command
+            path.write_text(body)
+            path.chmod(0o755)
+        self.env["PATH"] = f"{fake_bin}:{self.env['PATH']}"
+
+        result = self.run_installer("--full", "--apt", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("APT Bundle", result.stdout)
+        self.assertIn("git-lfs", result.stdout)
+        self.assertIn("Dry run completed", result.stdout)
+        self.assertFalse((Path(self.home.name) / ".zshrc").exists())
+
+    def test_apt_cannot_combine_with_dnf(self):
+        result = self.run_installer("--full", "--apt", "--dnf")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("cannot be combined", result.stdout)
+
     def test_doctor_does_not_modify_home(self):
 
         result = self.run_installer(
