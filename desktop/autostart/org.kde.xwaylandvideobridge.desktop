@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Xwayland Video Bridge
+Exec=xwaylandvideobridge
+TryExec=xwaylandvideobridge
+NoDisplay=true
+NotShowIn=niri;

@@ -1,0 +1,20 @@
+#!/bin/bash
+set -u
+if [[ "${XDG_CURRENT_DESKTOP:-}" != niri || -z "${NIRI_SOCKET:-}" ]]; then
+    printf '%s\n' 'Run this check from Ghostty inside the Niri session.' >&2
+    exit 1
+fi
+failed=0
+check() { printf '\n--- %s ---\n' "$*"; "$@" || failed=1; }
+check niri --version
+check niri validate
+check niri msg outputs
+check niri msg workspaces
+check niri msg keyboard-layouts
+check systemctl --user --no-pager status niri.service waybar.service mako.service niri-background.service niri-polkit.service niri-idle.service niri-clipboard-text.service niri-clipboard-image.service
+check systemctl --user --no-pager status pipewire.service wireplumber.service xdg-desktop-portal.service xdg-desktop-portal-gnome.service
+check wpctl status
+check busctl --user --no-pager status org.freedesktop.secrets
+if command -v nvidia-smi >/dev/null 2>&1; then check nvidia-smi; fi
+printf '\nManual checks: Ghostty/tmux/Neovim Unicode; RU/EN and shortcuts; clipboard; X11 IntelliJ; Flatpak file dialog; browser screen sharing; drag-and-drop; lock/unlock using password.\n'
+exit "$failed"

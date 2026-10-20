@@ -1,0 +1,25 @@
+font=JetBrainsMono Nerd Font 11
+background-color=#1e1e2ef8
+text-color=#cdd6f4
+border-color=#89b4fa
+border-size=2
+border-radius=10
+padding=12
+margin=10
+width=360
+height=180
+anchor=top-right
+default-timeout=6000
+max-visible=4
+icons=1
+icon-path=/usr/share/icons/Papirus-Dark
+max-icon-size=48
+[urgency=critical]
+border-color=#f38ba8
+default-timeout=0
+
+# Hide ordinary popups while preserving critical notifications.
+[mode=do-not-disturb]
+invisible=1
+[mode=do-not-disturb urgency=critical]
+invisible=0

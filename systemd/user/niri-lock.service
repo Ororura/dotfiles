@@ -1,0 +1,13 @@
+[Unit]
+Description=Niri secure screen lock
+PartOf=niri.service graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=forking
+ExitType=cgroup
+GuessMainPID=no
+ExecStart=/usr/bin/swaylock -f
+TimeoutStartSec=15

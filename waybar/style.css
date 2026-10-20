@@ -1,0 +1,93 @@
+@import "mocha.css";
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "Adwaita Sans", "JetBrainsMono Nerd Font";
+    font-size: 13px;
+    min-height: 0;
+}
+/* One edge-to-edge menu bar; the compositor supplies wallpaper blur. */
+window#waybar {
+    background-color: transparent;
+    background-image: linear-gradient(to bottom,
+        alpha(@mantle, 0.96) 0%,
+        alpha(@mantle, 0.91) 70%,
+        alpha(@mantle, 0.80) 100%);
+    color: @text;
+    border-radius: 0;
+    border-bottom: 1px solid alpha(@surface1, 0.55);
+}
+.modules-left, .modules-center, .modules-right {
+    background: transparent;
+    padding: 0 7px;
+}
+#custom-system-menu, #window, #custom-window-menu, #custom-shortcuts,
+#clock, #network, #pulseaudio, #language, #custom-presentation, #custom-quick-settings {
+    padding: 0 8px;
+    border-radius: 5px;
+    transition: background-color 160ms ease-in-out, color 160ms ease-in-out;
+}
+#custom-system-menu { font-family: "JetBrainsMono Nerd Font"; font-size: 18px; color: @blue; padding: 0 10px; }
+#window { font-weight: bold; color: @text; }
+#window image { margin-right: 5px; }
+#custom-window-menu, #custom-shortcuts { color: @subtext0; }
+#custom-system-menu:hover, #window:hover, #custom-window-menu:hover, #custom-shortcuts:hover,
+#clock:hover, #network:hover, #pulseaudio:hover, #language:hover,
+#custom-presentation:hover, #custom-quick-settings:hover {
+    background-color: alpha(@surface1, 0.55);
+}
+#workspaces { padding: 0 5px; }
+#workspaces button {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 11px;
+    padding: 0 7px;
+    margin: 5px 1px;
+    border-radius: 5px;
+    color: @subtext0;
+    background-color: transparent;
+    transition: background-color 160ms ease-in-out, color 160ms ease-in-out;
+}
+#workspaces button.active { background-color: alpha(@blue, 0.12); color: @blue; }
+#workspaces button.focused { background-color: alpha(@blue, 0.22); color: @blue; box-shadow: inset 0 -2px @blue; }
+#workspaces button.urgent { color: @red; }
+#workspaces button:hover { background-color: alpha(@surface1, 0.65); }
+#custom-sysmon {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 11px;
+    padding: 0 10px;
+    margin-right: 5px;
+    border-right: 1px solid alpha(@surface1, 0.55);
+}
+#custom-sysmon:hover { background-color: alpha(@surface0, 0.55); }
+#custom-sysmon.warning { box-shadow: inset 0 -2px alpha(@peach, 0.75); }
+#custom-sysmon.critical { box-shadow: inset 0 -2px @red; }
+#tray { padding: 0 7px; }
+#network, #pulseaudio, #custom-presentation, #custom-quick-settings {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 15px;
+    color: @text;
+}
+#language { font-size: 11px; font-weight: bold; color: @text; }
+#network.disconnected, #pulseaudio.muted { color: @subtext0; }
+#custom-presentation.inactive { color: @subtext0; }
+#custom-presentation.active {
+    color: @peach;
+    background-color: alpha(@peach, 0.16);
+    box-shadow: inset 0 -2px @peach;
+}
+#custom-quick-settings.dnd { color: @peach; }
+#clock { font-size: 12px; font-weight: 500; padding-left: 10px; padding-right: 5px; }
+tooltip { background: @base; border: 1px solid @surface1; border-radius: 9px; }
+tooltip label { font-family: "Adwaita Sans", "JetBrainsMono Nerd Font"; font-size: 12px; color: @text; padding: 7px; }
+
+/* Saint Petersburg: compact temperature before the clock. */
+#custom-weather {
+    font-family: "Adwaita Sans", "JetBrainsMono Nerd Font";
+    font-size: 12px;
+    padding: 0 8px;
+    color: @text;
+    border-radius: 5px;
+    transition: background-color 160ms ease-in-out;
+}
+#custom-weather:hover { background-color: alpha(@surface1, 0.55); }
+#custom-weather.stale, #custom-weather.offline { color: @subtext0; }

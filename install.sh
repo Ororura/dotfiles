@@ -15,6 +15,9 @@ DNF=false
 APT=false
 NVIM=false
 GHOSTTY=false
+NIRI=false
+NIRI_PROFILE="generic"
+NIRI_RGB=false
 BACKUP_DIR=""
 
 # ============================================================
@@ -53,6 +56,18 @@ for arg in "$@"; do
     GHOSTTY=true
     ;;
 
+  --niri)
+    NIRI=true
+    ;;
+
+  --niri-profile=*)
+    NIRI_PROFILE="${arg#*=}"
+    ;;
+
+  --niri-rgb)
+    NIRI_RGB=true
+    ;;
+
   --minimal)
     MINIMAL=true
     ;;
@@ -62,7 +77,7 @@ for arg in "$@"; do
     ;;
 
   --help)
-    echo "Usage: ./install.sh [--full [--brew | --dnf | --apt] | --minimal | --doctor] [--nvim] [--ghostty] [--dry-run]"
+    echo "Usage: ./install.sh [--full [--brew | --dnf | --apt] | --minimal | --doctor] [--nvim] [--ghostty] [--niri [--niri-profile=generic|ororura-desktop] [--niri-rgb]] [--dry-run]"
     exit 0
     ;;
 
@@ -131,6 +146,23 @@ if [[ "$GHOSTTY" == true && "$MINIMAL" == true ]]; then
   exit 1
 fi
 
+if [[ "$NIRI" == true && ( "$MINIMAL" == true || "$(uname -s)" != Linux ) ]]; then
+  echo "[ERROR] --niri requires Linux and cannot be combined with --minimal."
+  exit 1
+fi
+if [[ "$NIRI" != true && ( "$NIRI_PROFILE" != generic || "$NIRI_RGB" == true ) ]]; then
+  echo "[ERROR] Niri profile/RGB options require --niri."
+  exit 1
+fi
+if [[ "$NIRI_PROFILE" != generic && "$NIRI_PROFILE" != ororura-desktop ]]; then
+  echo "[ERROR] Unknown Niri profile: $NIRI_PROFILE"
+  exit 1
+fi
+if [[ "$NIRI_RGB" == true && "$NIRI_PROFILE" != ororura-desktop ]]; then
+  echo "[ERROR] --niri-rgb requires --niri-profile=ororura-desktop."
+  exit 1
+fi
+
 if [[ "$DOCTOR" == true ]]; then
 
   if [[ "$FULL" == true ||
@@ -140,7 +172,8 @@ if [[ "$DOCTOR" == true ]]; then
     "$BREW" == true ||
     "$DNF" == true ||
     "$APT" == true ||
-    "$GHOSTTY" == true ]]; then
+    "$GHOSTTY" == true ||
+    "$NIRI" == true ]]; then
 
     echo "[ERROR] --doctor cannot be combined with installation flags."
     exit 1
@@ -254,6 +287,10 @@ if [[ "$GHOSTTY" == true ]]; then
     "$DOTFILES_DIR/ghostty/config"
     "$DOTFILES_DIR/scripts/install-ghostty.sh"
   )
+fi
+
+if [[ "$NIRI" == true ]]; then
+  required_files+=("$DOTFILES_DIR/scripts/install-niri.sh" "$DOTFILES_DIR/niri/config.kdl")
 fi
 
 for source in "${required_files[@]}"; do
@@ -501,6 +538,18 @@ if [[ "$GHOSTTY" == true ]]; then
     bash "$DOTFILES_DIR/scripts/install-ghostty.sh"
   fi
 
+fi
+
+# ============================================================
+# Niri desktop (Linux, opt-in)
+# ============================================================
+
+if [[ "$NIRI" == true ]]; then
+  niri_arguments=(--profile "$NIRI_PROFILE")
+  if [[ "$DRY_RUN" == true ]]; then niri_arguments+=(--dry-run); fi
+  if [[ "$DNF" == true ]]; then niri_arguments+=(--packages); fi
+  if [[ "$NIRI_RGB" == true ]]; then niri_arguments+=(--rgb); fi
+  bash "$DOTFILES_DIR/scripts/install-niri.sh" "${niri_arguments[@]}"
 fi
 
 # ============================================================

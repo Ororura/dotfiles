@@ -1,0 +1,15 @@
+[Unit]
+Description=Niri RGB lighting controller (Gigabyte and Corsair USB only)
+PartOf=niri.service graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/niri-rgb/openrgb-1.1/AppRun --config %h/.config/niri/rgb --noautoconnect --server --server-host 127.0.0.1 --server-port 6743 --loglevel warning
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGINT
+TimeoutStopSec=15
+UMask=0077

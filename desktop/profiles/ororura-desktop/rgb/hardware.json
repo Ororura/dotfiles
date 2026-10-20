@@ -1,0 +1,12 @@
+{
+  "profile": "ororura-desktop",
+  "motherboard": "B550 AORUS PRO V2",
+  "gpu": {
+    "vendor": "0x10de",
+    "device": "0x21c4",
+    "subsystem_vendor": "0x1458",
+    "subsystem_device": "0x4020",
+    "adapter_index": 1,
+    "address": "0x47"
+  }
+}

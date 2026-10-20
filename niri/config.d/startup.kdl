@@ -1,0 +1,6 @@
+// Fedora niri-session + niri.service import the session environment.
+// Services are dependencies of niri.service; no duplicate spawn-at-startup.
+// Automatic xwayland-satellite integration is used (no DISPLAY override).
+environment {
+    GTK_THEME "Breeze-Dark"
+}

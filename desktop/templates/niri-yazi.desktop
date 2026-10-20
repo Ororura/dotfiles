@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Yazi (Ghostty)
+Comment=Terminal file manager with previews
+Exec="@HOME@/.config/niri/scripts/yazi-terminal" %f
+Icon=system-file-manager
+Terminal=false
+Categories=System;FileTools;FileManager;
+Keywords=files;terminal;yazi;
+StartupNotify=false

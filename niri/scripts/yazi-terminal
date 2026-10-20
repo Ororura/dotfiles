@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+if [[ -x "$HOME/.local/bin/yazi" ]]; then
+    YAZI_BIN="$HOME/.local/bin/yazi"
+else
+    YAZI_BIN="$(command -v yazi)"
+fi
+exec "$HOME/.config/niri/scripts/ghostty-mocha" --title=Yazi -e "$YAZI_BIN" "$@"

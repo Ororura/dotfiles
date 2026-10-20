@@ -1,0 +1,9 @@
+// Niri 26.04; includes are relative to this file.
+include "config.d/outputs.kdl"
+include "config.d/input.kdl"
+include "config.d/layout.kdl"
+include "config.d/workspaces.kdl"
+include "config.d/appearance.kdl"
+include "config.d/window-rules.kdl"
+include "config.d/startup.kdl"
+include "config.d/binds.kdl"

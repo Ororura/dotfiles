@@ -1,6 +1,6 @@
 # Ororura Dotfiles
 
-Shared terminal and development configuration for **macOS, Fedora, Debian, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, and optional package bundles.
+Shared terminal and development configuration for **macOS, Fedora, Debian, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, optional package bundles, and an optional Fedora GNOME + Niri desktop.
 
 > **Clone to `~/.dotfiles`.** The Zsh configuration and Git AI aliases currently depend on this path.
 
@@ -63,7 +63,7 @@ bash install.sh --doctor
 
 Neovim is intentionally excluded from the APT bundle. Current LazyVim requires **Neovim 0.11.2+**, while [Debian 12 supplies 0.7.2](https://packages.debian.org/bookworm/neovim) and [Debian 13 supplies 0.10.4](https://packages.debian.org/trixie/neovim). Install a compatible Neovim using the [official installation instructions](https://neovim.io/doc/install/) and check `nvim --version` before running `bash install.sh --nvim`. `--nvim` only links the config. [LazyVim requirements](https://github.com/LazyVim/LazyVim#%EF%B8%8F-requirements).
 
-On Linux, **Ghostty, Ollama, and an Ollama model are not installed automatically**. Install them separately if needed; `--ghostty` only links the tracked config.
+On Linux, **Ollama and an Ollama model are not installed automatically**. Ghostty can be installed by the optional Niri Fedora package bundle; otherwise install it separately. `--nvim` and `--ghostty` link tracked configs.
 
 The installer does not change your default login shell. `exec zsh` starts Zsh in the current terminal.
 
@@ -80,6 +80,8 @@ All commands below run from `~/.dotfiles`.
 | `bash install.sh --full --dnf` | Also install `dnf/packages.txt`; Fedora only. |
 | `bash install.sh --full --apt` | Also install `apt/packages.txt`; Debian/Ubuntu with APT. |
 | `bash install.sh --nvim` | Also link Neovim config. |
+| `bash install.sh --niri` | Also connect the Niri desktop; Linux only, with automatic monitor modes by default. |
+| `bash install.sh --full --dnf --niri --niri-profile=ororura-desktop --niri-rgb` | Restore the Fedora desktop with the saved monitor layout and verified RGB hardware. |
 | `bash install.sh --ghostty` | Also link Ghostty config. |
 | `bash install.sh --nvim --ghostty` | Link both editor and terminal configs. |
 | `bash install.sh --dry-run` | Preview the selected operation without changes. |
@@ -334,3 +336,32 @@ GitHub Actions runs Bash/Zsh/Python syntax checks and Python tests on pull reque
 ├── install.sh           Setup entry point
 └── README.md
 ~~~
+
+## Fedora GNOME + Niri desktop
+
+The desktop configurations and scripts from the working Catppuccin Mocha setup
+are tracked here. Full Russian migration and recovery instructions:
+[desktop/README.md](desktop/README.md).
+
+```bash
+# This computer after reinstalling Fedora Workstation and its NVIDIA driver:
+bash install.sh --full --dnf --nvim --ghostty --niri \
+  --niri-profile=ororura-desktop --niri-rgb --dry-run
+bash install.sh --full --dnf --nvim --ghostty --niri \
+  --niri-profile=ororura-desktop --niri-rgb
+
+# Another Fedora computer: automatic monitor layout, no hardware RGB:
+bash scripts/install-niri.sh --packages
+```
+
+Includes Niri KDL, Waybar MenuBar, Fuzzel, Mako, Swaylock/Swayidle, Ghostty
+overlay, Yazi, CPU/RAM/GPU/disk monitoring, Saint Petersburg weather, quick
+settings, presentation mode, wallpapers, Nerd Fonts and session-scoped user
+services. Yazi/OpenRGB release downloads are pinned and checked by SHA256;
+no compiled program bundles, clipboard history, secrets or runtime logs are
+committed. RGB is opt-in and restricted to the verified hardware profile.
+
+Existing files are preserved under `~/.dotfiles-backups/niri-*`; the installer
+provides `--restore BACKUP`. Most installed files are links into this repository.
+GNOME/GDM and the active graphical session are preserved. Existing NVIDIA
+drivers, development applications and personal data must be restored separately.
