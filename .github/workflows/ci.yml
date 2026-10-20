@@ -50,7 +50,8 @@ jobs:
           import ast
           from pathlib import Path
 
-          files = Path("git/scripts").glob("*.py")
+          files = [p for folder in ("git/scripts", "scripts", "niri/scripts", "waybar/scripts")
+                   for p in Path(folder).glob("*.py")]
 
           for file in files:
 
@@ -62,6 +63,9 @@ jobs:
               print(f"[OK] {file}")
           PY
 
-      - name: Run Git AI tests
+      - name: Validate desktop data
+        run: python3 scripts/check-desktop.py
+
+      - name: Run installer and Git AI tests
         run: |
           python3 -m unittest discover -s tests -v
