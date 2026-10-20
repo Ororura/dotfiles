@@ -218,6 +218,7 @@ def lighting_menu():
         label = 'неизвестно'
     choice = pick('Подсветка · ' + label, [
         ('on', '󰌵  Включить · Mocha Blue'),
+        ('red', '󰌵  Красный · #FF0000'),
         ('off', '󰹏  Выключить')])
     if choice:
         result = run([str(script), choice], check=False, timeout=60)

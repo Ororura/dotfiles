@@ -22,6 +22,7 @@ STATE_DIR = Path(os.environ.get('XDG_STATE_HOME', str(HOME / '.local/state'))) /
 STATE = STATE_DIR / 'rgb.json'
 TARGETS = {'Corsair Commander Core': 'Direct', 'B550 AORUS PRO V2': 'Static'}
 ON_COLOR = '89B4FA'
+RED_COLOR = 'FF0000'
 # H115i Elite Capellix ML140: 8 physical LEDs per fan. The OpenRGB
 # driver forces 34 RGB positions per port; fill the whole port to avoid
 # uninitialised padding bytes in its fixed-stride packet. PWM is untouched.
@@ -54,8 +55,9 @@ def status():
     pid = service_pid()
     if not pid or state.get('server_pid') != pid:
         return {'mode': 'hardware', 'label': 'аппаратный режим / не задана'}
+    color_name = {ON_COLOR: 'Mocha Blue', RED_COLOR: 'Красный'}.get(state.get('color'), '#' + state.get('color', '??????'))
     return {'mode': state.get('mode', 'unknown'),
-            'label': 'включена · Mocha Blue' if state.get('mode') == 'on' else 'выключена',
+            'label': 'включена · ' + color_name if state.get('mode') == 'on' else 'выключена',
             'applied_at': state.get('applied_at'), 'devices': state.get('devices', [])}
 
 
@@ -89,7 +91,9 @@ def client(args):
     return result.stdout
 
 
-def set_lighting(mode):
+def set_lighting(action):
+    mode = 'off' if action == 'off' else 'on'
+    color = {'on': ON_COLOR, 'red': RED_COLOR, 'off': '000000'}[action]
     if os.environ.get('XDG_CURRENT_DESKTOP') != 'niri':
         raise RuntimeError('Переключатель рассчитан на сеанс Niri')
     if not (HOME / '.config/niri/rgb/hardware.json').is_file():
@@ -124,7 +128,7 @@ def set_lighting(mode):
                 desired[name][zone_name] = count
                 if zone['count'] != count:
                     resize_args += ['--device', name, '--zone', str(zone['id']), '--size', str(count),
-                                    '--mode', TARGETS[name], '--color', ON_COLOR if mode == 'on' else '000000']
+                                    '--mode', TARGETS[name], '--color', color]
         if resize_args:
             client(resize_args)
             for item in snapshot():
@@ -132,7 +136,6 @@ def set_lighting(mode):
                     count = desired.get(item['name'], {}).get(zone['name'])
                     if count is not None and zone['count'] != count:
                         raise RuntimeError('Не применился размер RGB-зоны: ' + zone['name'])
-        color = ON_COLOR if mode == 'on' else '000000'
         args = []
         for name, effect in TARGETS.items():
             args += ['--device', name, '--mode', effect, '--color', color]
@@ -159,7 +162,7 @@ def set_lighting(mode):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['on', 'off', 'status'])
+    parser.add_argument('action', choices=['on', 'red', 'off', 'status'])
     args = parser.parse_args()
     if args.action == 'status': print(json.dumps(status(), ensure_ascii=False))
     else: set_lighting(args.action)
