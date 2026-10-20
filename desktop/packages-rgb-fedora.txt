@@ -1,0 +1,3 @@
+# Optional, exact hardware profile only. OpenRGB itself is a pinned AppImage.
+openrgb-udev-rules
+i2c-tools

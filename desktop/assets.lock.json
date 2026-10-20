@@ -1,0 +1,17 @@
+{
+  "yazi": {
+    "version": "26.9.1",
+    "url": "https://github.com/sxyazi/yazi/releases/download/v26.9.1/yazi-x86_64-unknown-linux-gnu.zip",
+    "sha256": "a02fe91d3304294048c681f010f1100856872a4e98ecf6927328e888d40a6ad2",
+    "files": {
+      "yazi": "a225a6a5af77574652a4bbc750369da7871f1bede6f0cd3a80ba6d704b9dea27",
+      "ya": "18b9c1660b576c37a83dc30ab34086ad7a97bb44fede20f4e66f7ab82dc3d4b0"
+    }
+  },
+  "openrgb": {
+    "version": "1.1",
+    "url": "https://codeberg.org/OpenRGB/OpenRGB/releases/download/release_1.1/OpenRGB_1.1_x86_64_8e16de2.AppImage",
+    "sha256": "d556c2273b0ef863dbee7ffdb438304b382add5d685c93c60758b42de3b0268d",
+    "binary_sha256": "48739d378cfcd27e8b8c8cfc6d820364dddf31f0a9819065be1a281a4ee98dab"
+  }
+}

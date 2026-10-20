@@ -15,3 +15,7 @@ venv/
 .env
 .env.*
 !.env.example
+
+# Installer snapshots and generated desktop runtime data
+.desktop-backups/
+*.bak
