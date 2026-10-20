@@ -1,0 +1,35 @@
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+}
+// Place regular app windows; exclude transient dialogs by title where needed.
+window-rule {
+    match app-id=r#"(?i)^(firefox|chromium|google-chrome|brave-browser|zen.*)$"#
+    open-on-workspace "Browser"
+}
+window-rule {
+    match app-id=r#"(?i)^(code|code-url-handler|jetbrains-idea.*|jetbrains-webstorm.*)$"#
+    open-on-workspace "Development"
+    default-column-width { proportion 0.66667; }
+}
+window-rule {
+    match app-id=r#"^com\.mitchellh\.ghostty$"#
+    exclude title="^(System Monitor|Yazi)$"
+    open-on-workspace "Terminal"
+}
+window-rule {
+    match app-id=r#"(?i)^(org\.telegram\.desktop|discord|com\.discordapp\.Discord|Slack)$"#
+    open-on-workspace "Communication"
+}
+window-rule {
+    match app-id=r#"(?i)^(org\.pulseaudio\.pavucontrol|pavucontrol|nm-connection-editor|mate-polkit.*)$"#
+    open-floating true
+}
+// Keep Steam popups and X11 drag-and-drop windows under normal satellite handling.
+
+window-rule {
+    match app-id=r#"^com\.mitchellh\.ghostty$"# title="^System Monitor$"
+    open-floating true
+    default-column-width { proportion 0.65; }
+    default-window-height { proportion 0.75; }
+}

@@ -1,0 +1,160 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "spacing": 1,
+  "modules-left": [
+    "custom/system-menu",
+    "niri/window",
+    "custom/window-menu",
+    "custom/shortcuts"
+  ],
+  "modules-center": [
+    "niri/workspaces"
+  ],
+  "modules-right": [
+    "custom/sysmon",
+    "tray",
+    "custom/presentation",
+    "niri/language",
+    "network",
+    "pulseaudio",
+    "custom/quick-settings",
+    "custom/weather",
+    "clock"
+  ],
+  "niri/workspaces": {
+    "format": "{index}",
+    "all-outputs": false,
+    "disable-click": false
+  },
+  "niri/window": {
+    "format": "{app_id}",
+    "rewrite": {
+      "^com\\.mitchellh\\.ghostty$": "Ghostty",
+      "^org\\.gnome\\.Nautilus$": "Файлы",
+      "^org\\.gnome\\.Settings$": "Настройки",
+      "^org\\.gnome\\.TextEditor$": "Текстовый редактор",
+      "^org\\.telegram\\.desktop$": "Telegram",
+      "^google-chrome(-.*)?$": "Chrome",
+      "^chromium(-browser)?$": "Chromium",
+      "^(firefox|org\\.mozilla\\.firefox)$": "Firefox",
+      "^(Code|code|code-url-handler|com\\.visualstudio\\.code)$": "VS Code",
+      "^jetbrains-idea.*$": "IntelliJ IDEA",
+      "^jetbrains-webstorm.*$": "WebStorm",
+      "^(Chatgpt|chatgpt|com\\.openai\\.ChatGPT)$": "ChatGPT",
+      "^(discord|com\\.discordapp\\.Discord)$": "Discord",
+      "^(Slack|slack|com\\.slack\\.Slack)$": "Slack",
+      "^(pavucontrol|org\\.pulseaudio\\.pavucontrol)$": "Звук",
+      "^$": "Рабочий стол"
+    },
+    "max-length": 22,
+    "separate-outputs": false,
+    "show-empty": true,
+    "icon": true,
+    "icon-size": 16,
+    "on-click": "~/.config/niri/scripts/menubar.py window"
+  },
+  "clock": {
+    "format": "{:%a, %d %b  %H:%M}",
+    "format-alt": "{:%d.%m.%Y  %H:%M:%S}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "interval": 1,
+    "locale": "ru_RU.UTF-8"
+  },
+  "network": {
+    "format-ethernet": "󰈀",
+    "format-wifi": "{icon}",
+    "format-disconnected": "󰖪",
+    "tooltip-format": "{ifname} · {essid}\n{ipaddr}/{cidr}\n↓ {bandwidthDownBytes} ↑ {bandwidthUpBytes}\nНажатие: настройки сети",
+    "on-click": "~/.config/niri/scripts/quick-settings.py network-menu",
+    "interval": 2,
+    "format-icons": [
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    "on-click-right": "nm-connection-editor"
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-muted": "󰝟",
+    "format-icons": {
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "on-click": "~/.config/niri/scripts/quick-settings.py sound-menu",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "scroll-step": 5,
+    "max-volume": 100,
+    "tooltip-format": "Звук: {volume}% · {desc}\nНажатие: звук и микрофон\nКолесо: громкость · ПКМ: выключить звук",
+    "on-click-middle": "pavucontrol"
+  },
+  "niri/language": {
+    "format": "{}",
+    "format-en": "EN",
+    "format-ru": "RU",
+    "on-click": "niri msg action switch-layout next"
+  },
+  "tray": {
+    "icon-size": 15,
+    "spacing": 7
+  },
+  "custom/shortcuts": {
+    "format": "Справка",
+    "tooltip-format": "Горячие клавиши · Super+F1",
+    "on-click": "~/.config/niri/scripts/shortcuts.py"
+  },
+  "margin-top": 0,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-bottom": 0,
+  "custom/sysmon": {
+    "exec": "~/.config/waybar/scripts/system-monitor.py",
+    "return-type": "json",
+    "format": "{}",
+    "restart-interval": 5,
+    "exec-on-event": false,
+    "on-click": "~/.config/niri/scripts/system-monitor",
+    "escape": false
+  },
+  "custom/presentation": {
+    "exec": "~/.config/niri/scripts/quick-settings.py presentation-status",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 2,
+    "on-click": "~/.config/niri/scripts/quick-settings.py presentation-toggle",
+    "exec-on-event": false
+  },
+  "custom/quick-settings": {
+    "exec": "~/.config/niri/scripts/quick-settings.py status",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 5,
+    "on-click": "~/.config/niri/scripts/quick-settings.py menu",
+    "exec-on-event": false
+  },
+  "custom/system-menu": {
+    "format": "",
+    "tooltip-format": "Система · приложения, настройки и питание",
+    "on-click": "~/.config/niri/scripts/menubar.py system",
+    "on-click-right": "~/.config/niri/scripts/quick-settings.py menu"
+  },
+  "custom/window-menu": {
+    "format": "Окно",
+    "tooltip-format": "Размер, расположение и закрытие активного окна",
+    "on-click": "~/.config/niri/scripts/menubar.py window"
+  },
+  "custom/weather": {
+    "exec": "~/.config/waybar/scripts/weather.py",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 60,
+    "on-click": "~/.config/waybar/scripts/weather.py --refresh",
+    "exec-on-event": true
+  }
+}

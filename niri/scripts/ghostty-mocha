@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /usr/bin/ghostty --config-default-files=false --config-file="$HOME/.config/niri/ghostty-mocha.conf" "$@"

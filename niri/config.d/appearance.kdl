@@ -1,0 +1,24 @@
+prefer-no-csd
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+animations {
+    slowdown 0.85
+}
+overview {
+    backdrop-color "#11111b"
+}
+screenshot-path "~/Pictures/Screenshots/Niri-%Y-%m-%d-%H-%M-%S.png"
+hotkey-overlay {
+    skip-at-startup
+}
+
+// Waybar backdrop blur: Niri 26.04, restricted to the panel.
+layer-rule {
+    match namespace="^waybar$"
+    background-effect {
+        blur true
+        xray true
+    }
+}

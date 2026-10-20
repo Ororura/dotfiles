@@ -1,0 +1,3 @@
+#!/bin/bash
+set -euo pipefail
+exec "$HOME/.config/niri/scripts/ghostty-mocha" --title='System Monitor' -e /usr/bin/btop --config "$HOME/.config/niri/btop/btop.conf" --themes-dir "$HOME/.config/niri/btop"

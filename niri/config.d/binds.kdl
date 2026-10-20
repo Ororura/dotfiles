@@ -1,0 +1,84 @@
+binds {
+    Super+S repeat=false hotkey-overlay-title="Система · Быстрые настройки" { spawn "~/.config/niri/scripts/quick-settings.py" "menu"; }
+    Super+Shift+P repeat=false hotkey-overlay-title="Система · Просмотр / презентация" { spawn "~/.config/niri/scripts/quick-settings.py" "presentation-toggle"; }
+    Super+E repeat=false hotkey-overlay-title="Файлы · Yazi в Ghostty" { spawn "~/.config/niri/scripts/yazi-terminal"; }
+    Super+Return repeat=false hotkey-overlay-title="Ghostty" { spawn "~/.config/niri/scripts/ghostty-mocha"; }
+    Super+D repeat=false hotkey-overlay-title="Applications" { spawn "fuzzel"; }
+    Super+Q { close-window; }
+    Super+H { focus-column-left; }
+    Super+J { focus-window-down; }
+    Super+K { focus-window-up; }
+    Super+L { focus-column-right; }
+    Super+Left { focus-column-left; }
+    Super+Down { focus-window-down; }
+    Super+Up { focus-window-up; }
+    Super+Right { focus-column-right; }
+    Super+Shift+H { move-column-left; }
+    Super+Shift+J { move-window-down; }
+    Super+Shift+K { move-window-up; }
+    Super+Shift+Left { move-column-left; }
+    Super+Shift+Down { move-window-down; }
+    Super+Shift+Up { move-window-up; }
+    Super+Shift+Right { move-column-right; }
+    Super+Shift+L repeat=false allow-inhibiting=false hotkey-overlay-title="Lock screen" { spawn "systemctl" "--user" "start" "niri-lock.service"; }
+    Super+F { fullscreen-window; }
+    Super+Shift+Space { toggle-window-floating; }
+    Super+Space repeat=false hotkey-overlay-title="Switch RU/EN" { switch-layout "next"; }
+    Super+Ctrl+Space { switch-focus-between-floating-and-tiling; }
+    Super+C { center-column; }
+    Super+R { switch-preset-column-width; }
+    Super+Minus { set-column-width "-5%"; }
+    Super+Equal { set-column-width "+5%"; }
+    Super+Shift+Minus { set-window-height "-5%"; }
+    Super+Shift+Equal { set-window-height "+5%"; }
+    Super+M { maximize-column; }
+    Super+BracketLeft { consume-or-expel-window-left; }
+    Super+BracketRight { consume-or-expel-window-right; }
+    Super+Page_Up { focus-workspace-up; }
+    Super+Page_Down { focus-workspace-down; }
+    Super+Shift+Page_Up { move-window-to-workspace-up; }
+    Super+Shift+Page_Down { move-window-to-workspace-down; }
+    Super+Ctrl+Left { focus-monitor-left; }
+    Super+Ctrl+Right { focus-monitor-right; }
+    Super+Ctrl+Shift+Left { move-column-to-monitor-left; }
+    Super+Ctrl+Shift+Right { move-column-to-monitor-right; }
+    Super+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+    Super+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Super+Ctrl+WheelScrollUp cooldown-ms=150 { focus-column-left; }
+    Super+Ctrl+WheelScrollDown cooldown-ms=150 { focus-column-right; }
+    Super+F1 repeat=false hotkey-overlay-title="Все сочетания — поиск" { spawn "~/.config/niri/scripts/shortcuts.py"; }
+    Super+O { toggle-overview; }
+    Super+Shift+Slash { show-hotkey-overlay; }
+    Super+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Super+V repeat=false hotkey-overlay-title="Clipboard history" { spawn "~/.config/niri/scripts/clipboard-menu"; }
+    Super+Shift+V repeat=false hotkey-overlay-title="Clear clipboard history" { spawn "~/.config/niri/scripts/clipboard-clear"; }
+    Print repeat=false { screenshot; }
+    Ctrl+Print repeat=false { screenshot-screen; }
+    Alt+Print repeat=false { screenshot-window; }
+    Super+Shift+E repeat=false { quit; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioPlay { spawn "playerctl" "play-pause"; }
+    XF86AudioNext { spawn "playerctl" "next"; }
+    XF86AudioPrev { spawn "playerctl" "previous"; }
+    Super+1 { focus-workspace "Browser"; }
+    Super+Shift+1 { move-window-to-workspace "Browser"; }
+    Super+2 { focus-workspace "Development"; }
+    Super+Shift+2 { move-window-to-workspace "Development"; }
+    Super+3 { focus-workspace "Terminal"; }
+    Super+Shift+3 { move-window-to-workspace "Terminal"; }
+    Super+4 { focus-workspace "Communication"; }
+    Super+Shift+4 { move-window-to-workspace "Communication"; }
+    Super+5 { focus-workspace "Misc"; }
+    Super+Shift+5 { move-window-to-workspace "Misc"; }
+    Super+6 { focus-workspace 6; }
+    Super+Shift+6 { move-window-to-workspace 6; }
+    Super+7 { focus-workspace 7; }
+    Super+Shift+7 { move-window-to-workspace 7; }
+    Super+8 { focus-workspace 8; }
+    Super+Shift+8 { move-window-to-workspace 8; }
+    Super+9 { focus-workspace 9; }
+    Super+Shift+9 { move-window-to-workspace 9; }
+}

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+menu=(fuzzel --dmenu --keyboard-focus=on-demand --anchor=top-left --x-margin=8 --y-margin=0 --width=56)
+choice=$(printf '%s\n' 'Заблокировать' 'Выйти из Niri' 'Перезагрузить' 'Выключить' | "${menu[@]}" --lines=10 --prompt='Сеанс ❯ ') || exit 0
+case "$choice" in
+    'Заблокировать') exec systemctl --user start niri-lock.service ;;
+    'Выйти из Niri') exec niri msg action quit ;;
+    'Перезагрузить'|'Выключить')
+        confirm=$(printf '%s\n' 'Отмена' "Подтвердить: $choice" | "${menu[@]}" --lines=10 --prompt='Подтверждение ❯ ') || exit 0
+        [[ "$confirm" == "Подтвердить: $choice" ]] || exit 0
+        if [[ "$choice" == 'Перезагрузить' ]]; then exec systemctl reboot; else exec systemctl poweroff; fi ;;
+esac

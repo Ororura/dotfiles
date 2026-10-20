@@ -1,0 +1,10 @@
+[Unit]
+Description=Niri idle lock and display power management
+PartOf=niri.service graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+ExecStart=/usr/bin/swayidle -w timeout 600 '%h/.config/niri/scripts/quick-settings.py idle-lock' timeout 660 '%h/.config/niri/scripts/quick-settings.py idle-off' resume '/usr/bin/niri msg action power-on-monitors' before-sleep '/usr/bin/systemctl --user start niri-lock.service' lock '/usr/bin/systemctl --user start niri-lock.service'
+Restart=on-failure

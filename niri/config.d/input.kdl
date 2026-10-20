@@ -1,0 +1,23 @@
+input {
+    keyboard {
+        xkb {
+            layout "us,ru"
+            options ""
+        }
+        repeat-delay 300
+        repeat-rate 35
+        track-layout "global"
+        numlock
+    }
+    mouse {
+        accel-speed 0.0
+        accel-profile "flat"
+    }
+    touchpad {
+        tap
+        natural-scroll
+        dwt
+    }
+    focus-follows-mouse max-scroll-amount="0%"
+    // Keep the pointer in place when keyboard focus or workspace changes.
+}

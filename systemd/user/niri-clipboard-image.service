@@ -1,0 +1,11 @@
+[Unit]
+Description=Niri image clipboard history
+PartOf=niri.service graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+ExecStart=/usr/bin/wl-paste --type image --watch /usr/bin/cliphist store
+Restart=on-failure
+UMask=0077

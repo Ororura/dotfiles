@@ -1,0 +1,5 @@
+workspace "Browser" { open-on-output "DP-1"; }
+workspace "Development" { open-on-output "DP-1"; }
+workspace "Terminal" { open-on-output "DP-1"; }
+workspace "Communication" { open-on-output "DP-1"; }
+workspace "Misc" { open-on-output "DP-1"; }

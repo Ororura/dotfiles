@@ -1,0 +1,2 @@
+// Portable default: use each monitor’s preferred mode and automatic placement.
+// The ororura-desktop profile restores DP-1 QHD 165 Hz and DP-2 FHD 144 Hz.

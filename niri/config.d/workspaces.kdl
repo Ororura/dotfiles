@@ -1,0 +1,5 @@
+workspace "Browser" {}
+workspace "Development" {}
+workspace "Terminal" {}
+workspace "Communication" {}
+workspace "Misc" {}

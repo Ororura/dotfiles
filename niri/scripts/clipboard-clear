@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+cliphist wipe
+wl-copy --clear

@@ -1,0 +1,15 @@
+[mgr]
+ratio = [1, 4, 3]
+sort_by = "natural"
+sort_dir_first = true
+show_hidden = false
+show_symlink = true
+linemode = "size"
+
+[preview]
+wrap = "yes"
+max_width = 1200
+max_height = 1000
+
+[opener]
+edit = [{ run = 'nvim %s', block = true, desc = "Neovim", for = "unix" }]
