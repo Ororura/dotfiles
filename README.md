@@ -1,6 +1,6 @@
 # Ororura Dotfiles
 
-Shared terminal and development configuration for **macOS, Fedora, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, optional macOS Homebrew applications, and an optional Fedora GNOME + Niri desktop.
+Shared terminal and development configuration for **macOS, Fedora, Debian, and Ubuntu**. This repository manages Zsh, Git, tmux, Neovim (LazyVim), Ghostty, optional package bundles, and an optional Fedora GNOME + Niri desktop.
 
 > **Clone to `~/.dotfiles`.** The Zsh configuration and Git AI aliases currently depend on this path.
 
@@ -29,14 +29,10 @@ bash install.sh --doctor
 
 `--brew` installs the curated Brewfile (including Ghostty and Neovim), but does **not** install Homebrew itself.
 
-### Fedora / Ubuntu
+### Fedora
 
 ~~~bash
-# Fedora:
 sudo dnf install -y git bash
-
-# Ubuntu alternative:
-# sudo apt-get update && sudo apt-get install -y git bash
 
 git clone https://github.com/Ororura/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
@@ -48,7 +44,26 @@ exec zsh
 bash install.sh --doctor
 ~~~
 
-On Linux, **Neovim, Ollama, and an Ollama model are not installed automatically**. Ghostty is installed by the optional Niri Fedora package bundle; otherwise install it separately. `--nvim` and `--ghostty` connect the tracked configs.
+### Debian / Ubuntu
+
+~~~bash
+sudo apt-get update && sudo apt-get install -y git bash
+git clone https://github.com/Ororura/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+cat apt/packages.txt
+bash install.sh --full --apt --dry-run
+bash install.sh --full --apt
+
+exec zsh
+bash install.sh --doctor
+~~~
+
+`--apt` installs the tools in `apt/packages.txt` from configured APT repositories. It works with `sudo` or as root; inspect the list and dry run first. On Debian the `bat` and `fd-find` packages provide commands named `batcat` and `fdfind`.
+
+Neovim is intentionally excluded from the APT bundle. Current LazyVim requires **Neovim 0.11.2+**, while [Debian 12 supplies 0.7.2](https://packages.debian.org/bookworm/neovim) and [Debian 13 supplies 0.10.4](https://packages.debian.org/trixie/neovim). Install a compatible Neovim using the [official installation instructions](https://neovim.io/doc/install/) and check `nvim --version` before running `bash install.sh --nvim`. `--nvim` only links the config. [LazyVim requirements](https://github.com/LazyVim/LazyVim#%EF%B8%8F-requirements).
+
+On Linux, **Ollama and an Ollama model are not installed automatically**. Ghostty can be installed by the optional Niri Fedora package bundle; otherwise install it separately. `--nvim` and `--ghostty` link tracked configs.
 
 The installer does not change your default login shell. `exec zsh` starts Zsh in the current terminal.
 
@@ -62,15 +77,17 @@ All commands below run from `~/.dotfiles`.
 | `bash install.sh --minimal` | Link only Zsh and Git configuration. Have Zsh installed beforehand. |
 | `bash install.sh --full` | Install missing terminal tools, Oh My Zsh/Powerlevel10k/Zsh plugins, TPM/tmux plugins; check Git AI dependencies. |
 | `bash install.sh --full --brew` | Also install `brew/Brewfile`; macOS only. |
+| `bash install.sh --full --dnf` | Also install `dnf/packages.txt`; Fedora only. |
+| `bash install.sh --full --apt` | Also install `apt/packages.txt`; Debian/Ubuntu with APT. |
 | `bash install.sh --nvim` | Also link Neovim config. |
-| `bash install.sh --niri` | Also connect the Niri desktop; Linux only, automatic monitor modes by default. |
-| `bash install.sh --full --dnf --niri --niri-profile=ororura-desktop --niri-rgb` | Restore the Fedora desktop, pinned tools, saved monitors and verified RGB hardware. |
+| `bash install.sh --niri` | Also connect the Niri desktop; Linux only, with automatic monitor modes by default. |
+| `bash install.sh --full --dnf --niri --niri-profile=ororura-desktop --niri-rgb` | Restore the Fedora desktop with the saved monitor layout and verified RGB hardware. |
 | `bash install.sh --ghostty` | Also link Ghostty config. |
 | `bash install.sh --nvim --ghostty` | Link both editor and terminal configs. |
 | `bash install.sh --dry-run` | Preview the selected operation without changes. |
 | `bash install.sh --doctor` | Diagnose configuration links and optional tools. |
 
-Combine `--nvim` and `--ghostty` with `--full` if desired. They cannot be combined with `--minimal`. `--brew` requires `--full`. `--doctor` is a standalone mode.
+Combine `--nvim` and `--ghostty` with `--full` if desired. They cannot be combined with `--minimal`. Package bundle flags require `--full` and are mutually exclusive. `--doctor` is a standalone mode.
 
 ### Installed links
 
@@ -98,6 +115,7 @@ All config files remain in the Git repository. A linked config updates immediate
 | Shared Git settings / aliases | `git/config` |
 | Git AI behavior | `git/scripts/`; defaults in `git/ai.env.example` |
 | Mac applications | `brew/Brewfile` |
+| Debian/Ubuntu packages | `apt/packages.txt` |
 | tmux keys and plugins | `tmux/tmux.conf` |
 | Neovim options / keymaps / plugins | `nvim/lua/config/` / `nvim/lua/plugins/` |
 | Ghostty font, colors, window settings | `ghostty/config` |
@@ -145,31 +163,32 @@ git config --global user.email "you@example.com"
 
 ## Git AI (local Ollama)
 
-The shared `git/config` defines these commands:
+The shared `git/config` defines one `git ai` alias:
 
 | Command | Action |
 | --- | --- |
-| `git ai-msg` | Generate a staged-diff commit message without committing. |
-| `git ai-commit` | Generate a message, open an editor, commit. |
-| `git ai-branch "describe the task"` | Suggest a branch name and ask before creating it. |
-| `git ai-review` | Review staged changes; `--worktree` reviews tracked changes relative to HEAD. |
-| `git ai-split` | Suggest groups of commits; does **not** modify Git or create commits. |
-| `git ai-pr --base main` | Describe **committed** branch changes for a PR. |
-| `git ai-publish` | Push the branch, draft a PR body, invoke GitHub CLI. |
-| `git ai-changelog --base v1.0.0` | Draft release notes from a tag/commit. |
-| `git ai-explain HEAD` | Explain a commit. |
+| `git ai branch "describe the task"` | Suggest a branch name and ask before creating it; without a description, inspect current changes. |
+| `git ai commit` | Generate a staged-diff message, show it, then open the Git commit editor after confirmation. |
+| `git ai review` | Review staged changes; `--worktree` reviews tracked changes relative to HEAD. |
+| `git ai split` | Suggest atomic commit groups and exact paths; does **not** change the index or commits. |
+| `git ai pr --base main` | Describe **committed** branch changes for a PR. |
+| `git ai publish` | Check a clean topic branch, push, reuse an open PR or edit and create one, then show PR and checks. |
+| `git ai changelog --base v1.0.0` | Draft release notes from a tag/commit. |
+| `git ai explain HEAD` | Explain a commit. |
 
 Typical flow:
 
 ~~~bash
 git add -p
 git diff --cached --check
-git ai-review
-git ai-commit
-git ai-publish
+git ai review
+git ai commit
+git ai publish
 ~~~
 
-The default model is `qwen3.5:9b` and the default endpoint is `http://127.0.0.1:11434/api/chat`. `git/ai.env.example` documents environment overrides. `--full` checks Git AI requirements; it does **not** install Ollama, pull a model, or log in to GitHub CLI. Use `gh auth login` separately if needed.
+The default model is `qwen3.5:9b` and the default endpoint is `http://127.0.0.1:11434/api/chat`. `git/ai.env.example` documents `OLLAMA_GIT_*` overrides. Large diffs are analyzed in file-aware parts; commit, PR, changelog, explain, and split use summaries of every part. `--full` checks Git AI requirements; it does **not** install Ollama, pull a model, or log in to GitHub CLI. Use `gh auth login` separately if needed.
+
+Migration: the old `git ai-*` aliases were removed. Use the corresponding `git ai <command>` form; there are no compatibility aliases to maintain alongside the new CLI.
 
 The AI tools inspect diffs. Review staged changes before invoking them: file-name safety checks cannot guarantee secret detection. If you configure a remote Ollama endpoint, the selected changes are sent to that server.
 
@@ -317,7 +336,6 @@ GitHub Actions runs Bash/Zsh/Python syntax checks and Python tests on pull reque
 ├── install.sh           Setup entry point
 └── README.md
 ~~~
-
 
 ## Fedora GNOME + Niri desktop
 
